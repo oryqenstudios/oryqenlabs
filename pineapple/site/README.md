@@ -52,11 +52,18 @@ public/frames/ manifest.json + generated frames
 
 ## Adding AI frames
 
-1. Export frames as `public/frames/shot-NN/0001.webp …` (see the shot prompts for counts and the ffmpeg command).
-2. Set `"ready": true` for that shot in `public/frames/manifest.json`. Optional phone-sized copies go in `public/frames/mobile/shot-NN/` with `"mobile": true`.
-3. Master stills: `public/frames/shot-00/ripen.webp` (and `rind`, `golden`, `green`, `core`; Slate Pro as `slate-ripen.webp` …), then list the names in `stills.ready`.
+One command per shot (needs ffmpeg). It samples exactly the right number of frames, cover-crops to 16:9, writes 1440p
+frames plus 720p phone copies, and marks the shot ready in `public/frames/manifest.json`:
 
-The player loads every 8th frame first, then fills in, and always draws the nearest loaded frame, so scrubbing works immediately.
+```bash
+node scripts/ingest.mjs 1 ~/Downloads/juice-drop.mp4               # shots 1–10
+node scripts/ingest.mjs 3 orbit.mp4 --from 0.5 --to 7.5             # use only part of a clip
+node scripts/ingest.mjs 0 master.png --finish ripen                 # master stills (shot 0)
+node scripts/ingest.mjs 0 slate-back.png --finish rind --device tablet
+```
+
+Commit and push: the Pages workflow publishes it. Frames are committed to the repo (Pages serves up to 1 GB; a shot is
+roughly 10–25 MB). The player loads every 8th frame first, then fills in, and always draws the nearest loaded frame.
 Shots without frames show placeholder art and a dashed "AI sequence slot" label.
 
 ## How the live 3D works

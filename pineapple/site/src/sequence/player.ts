@@ -75,7 +75,7 @@ export class SequencePlayer {
 
   private isReady(s: Shot) {
     if (!this.manifest) return false;
-    if (s.id === 0) return this.manifest.stills.ready.includes(String(this.opts.fin ?? 'ripen'));
+    if (s.id === 0) return this.manifest.stills.ready.includes(`${this.opts.device === 'tablet' ? 'slate-' : ''}${this.opts.fin ?? 'ripen'}`);
     return !!this.manifest.shots[s.id]?.ready;
   }
   private url(s: Shot, i: number) {
