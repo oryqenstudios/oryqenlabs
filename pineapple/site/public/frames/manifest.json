@@ -15,15 +15,21 @@
     "1": {
       "frames": 120,
       "ready": true,
-      "mobile": true
+      "mobile": true,
+      "variants": [
+        "ripen",
+        "rind",
+        "golden",
+        "green",
+        "core"
+      ]
     },
     "2": {
       "frames": 150,
-      "ready": true,
-      "mobile": true
+      "ready": false
     },
     "3": {
-      "frames": 180,
+      "frames": 120,
       "ready": true,
       "mobile": true
     },
@@ -59,6 +65,26 @@
     },
     "10": {
       "frames": 150,
+      "ready": true,
+      "mobile": true
+    },
+    "11": {
+      "frames": 120,
+      "ready": true,
+      "mobile": true
+    },
+    "12": {
+      "frames": 96,
+      "ready": true,
+      "mobile": true
+    },
+    "13": {
+      "frames": 96,
+      "ready": true,
+      "mobile": true
+    },
+    "14": {
+      "frames": 144,
       "ready": true,
       "mobile": true
     }

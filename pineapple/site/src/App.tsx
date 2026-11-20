@@ -4,7 +4,8 @@ import { Nav } from './components/Nav';
 import { Loader } from './components/Loader';
 import { SpiralBackground } from './components/SpiralBackground';
 import { Hero } from './sections/Hero';
-import { Frozen, Design, Finish, Camera, Chip, Durability } from './sections/Cinematic';
+import { Design, Finish, Camera, Chip, Durability } from './sections/Cinematic';
+import { Reveal } from './sections/Reveal';
 import { Inside } from './sections/Inside';
 import { Numbers } from './sections/Numbers';
 import { Slate } from './sections/Slate';
@@ -41,7 +42,7 @@ export default function App() {
       <Nav />
       <main id="main" tabIndex={-1}>
         <Hero />
-        <Frozen />
+        <Reveal />
         <Design />
         <Finish />
         <Inside />

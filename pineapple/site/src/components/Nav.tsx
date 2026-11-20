@@ -4,7 +4,7 @@ import { scrollToTarget } from '../lib/scroll';
 import { sound } from '../lib/sound';
 
 export const NAV_LINKS: [string, string][] = [
-  ['drop', 'Crown Pro'], ['design', 'Design'], ['finish', 'Finishes'], ['inside', 'Inside'], ['camera', 'Camera'],
+  ['drop', 'Crown Pro'], ['reveal', 'Design'], ['finish', 'Finishes'], ['inside', 'Inside'], ['camera', 'Camera'],
   ['chip', 'Chip'], ['water', 'Durability'], ['slate', 'Slate Pro'], ['compare', 'Compare'],
 ];
 export const FROM_PRICE = '$1,199'; // placeholder, see Compare

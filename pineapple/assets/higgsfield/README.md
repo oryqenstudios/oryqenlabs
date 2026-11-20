@@ -178,3 +178,23 @@ Used by the Finish section (04), which crossfades between them.
 
 - `green` · request `01a1f9f8-dd1d-73f8-9356-5f18cc16f152`
   > Recolour this phone to a new finish: deep leaf-green frosted back glass, like a pineapple crown, with a dark green-grey titanium frame and a matching green camera plateau. Change only those colours. Keep everything else exactly the same: the same camera angle, position, size and framing, the same phone shape, the same hexagonal camera plateau and three lenses, the same etched scale pattern on the back, the same lighting and the same black background.
+
+## Rebuild (hero spin and splash, section 02 reveal, camera approach)
+
+Stills are Qwen Image 3 edits (2K, 16:9, seed 37), archived as high-quality JPEG; clips are Kling 3.0 image-to-video with a first and last frame, sound off, cfg_scale 0.5.
+
+| File | What | Request |
+| --- | --- | --- |
+| `shot-01-spin-splash-ripen.mp4` | Hero, ripen: the whole phone turns from screen to back while a splash in the finish's colours floods the frame. 4K, 6 s. Starts on `shot-01-start-ripen.jpg`, ends on `shot-01-end-ripen.jpg` | `01a1fa1a-ba4f-707d-9617-0a275a065f88` |
+| `shot-01-spin-splash-rind.mp4` | Hero, rind: the whole phone turns from screen to back while a splash in the finish's colours floods the frame. 4K, 6 s. Starts on `shot-01-start-rind.jpg`, ends on `shot-01-end-rind.jpg` | `01a1fa1a-ba6f-7ce3-9e67-750ee38d9bdd` |
+| `shot-01-spin-splash-golden.mp4` | Hero, golden: the whole phone turns from screen to back while a splash in the finish's colours floods the frame. 4K, 6 s. Starts on `shot-01-start-golden.jpg`, ends on `shot-01-end-golden.jpg` | `01a1fa1a-b928-70ac-93a2-480186fd658b` |
+| `shot-01-spin-splash-green.mp4` | Hero, green: the whole phone turns from screen to back while a splash in the finish's colours floods the frame. 4K, 6 s. Starts on `shot-01-start-green.jpg`, ends on `shot-01-end-green.jpg` | `01a1fa1a-b92b-7d7a-8819-17ba940ffc80` |
+| `shot-01-spin-splash-core.mp4` | Hero, core: the whole phone turns from screen to back while a splash in the finish's colours floods the frame. 4K, 6 s. Starts on `shot-01-start-core.jpg`, ends on `shot-01-end-core.jpg` | `01a1fa1a-b918-74fd-8c32-baf0cb8795ae` |
+| `shot-03-light-finds-the-lens.mp4` | Section 02: a shaft of light finds the camera plateau in darkness and the view glides in. 1080p, 5 s. First frame `inputs/reveal-dark.jpg` (the reveal frame darkened around a pool of light), last `shot-03-macro-lens.jpg` | `01a1fa1a-5b1a-73a2-b2ec-596715d2d862` |
+| `shot-11-pull-back-to-crown.mp4` | Pull back from the lens to the whole phone in front of the CROWN letters (`shot-03-reveal-end-frame.png`). 1080p, 5 s | `01a1fa1a-5b20-790a-9f9a-ed93e79292d2` |
+| `shot-12-into-the-scales.mp4` | Camera move from the reveal frame into the etched scales (`shot-03-macro-scales.jpg`). 1080p, 4 s | `01a1fa1a-5a03-7cdf-95da-50fb07613023` |
+| `shot-13-into-the-crown-key.mp4` | Camera move from the reveal frame into the side keys (`shot-03-macro-key.jpg`). 1080p, 4 s | `01a1fa1a-5b3e-78a5-ae8b-ee73dd90a375` |
+| `shot-14-camera-approach.mp4` | Camera section: from the whole phone (master) slowly in to the camera plateau, ending on `shot-06-start-frame.png`. 1080p, 6 s | `01a1fa19-b3df-7cbd-94e9-1be0a4e4a595` |
+
+Macros (`shot-03-macro-*.jpg`) are exact crops of the reveal frame (`inputs/crop-*.jpg`), sharpened by an edit that keeps the framing, so each camera move lands precisely on its detail.
+A first hero take (8 s, splash around the phone rather than filling the frame, request `01a1fa0f-7e20-7ba1-838f-76e885bb1f6c`) and a 1080p motion test (`01a1fa17-52a0-76bd-8a2f-4c960681ef82`) were not used.

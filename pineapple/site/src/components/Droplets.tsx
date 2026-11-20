@@ -1,9 +1,10 @@
 import { useEffect, useRef } from 'react';
 import { reducedMotion } from '../lib/tokens';
+import { finishPalette, getFinish } from '../lib/finish';
 
-const COLOURS = ['#f0b53a', '#6fa43f', '#f0c64e', '#efe6c8', '#a6b542'];
+const pick = (a: string[]) => a[(Math.random() * a.length) | 0];
 
-/** Hero: colour droplets follow the cursor and fall away (plan §5). Mouse only; off for reduced motion. */
+/** Hero: droplets in the chosen finish's colours follow the cursor and fall away (plan §5). Mouse only; off for reduced motion. */
 export function Droplets() {
   const ref = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
@@ -29,7 +30,7 @@ export function Droplets() {
       if (e.pointerType !== 'mouse') return;
       const now = performance.now(); if (now - last < 18) return; last = now;
       const r = c.getBoundingClientRect();
-      drops.push({ x: e.clientX - r.left, y: e.clientY - r.top, vx: (Math.random() - 0.5) * 1.6, vy: -1 - Math.random() * 1.5, r: 3 + Math.random() * 5, c: COLOURS[(Math.random() * 5) | 0], t0: now });
+      drops.push({ x: e.clientX - r.left, y: e.clientY - r.top, vx: (Math.random() - 0.5) * 1.6, vy: -1 - Math.random() * 1.5, r: 3 + Math.random() * 5, c: pick(finishPalette(getFinish())), t0: now });
       if (!raf) raf = requestAnimationFrame(loop);
     };
     host.addEventListener('pointermove', move);

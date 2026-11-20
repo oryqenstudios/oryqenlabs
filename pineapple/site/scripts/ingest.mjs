@@ -2,12 +2,14 @@
 /**
  * Turn an AI-generated clip or still into site-ready frames and mark it ready.
  *
- *   node scripts/ingest.mjs <shot 1-10> <clip.mp4> [--from <s>] [--to <s>]
+ *   node scripts/ingest.mjs <shot> <clip.mp4> [--from <s>] [--to <s>] [--frames <n>] [--variant <finish>]
  *   node scripts/ingest.mjs 0 <still.png|jpg|webp> --finish <ripen|rind|golden|green|core> [--device tablet]
  *
  * Video: samples exactly the manifest's frame count for the shot evenly across the clip (or the
  * --from/--to segment), cover-crops to 16:9, and writes 2560×1440 WebP frames to
  * public/frames/shot-NN/0001.webp… plus 1280×720 copies to public/frames/mobile/shot-NN/.
+ * --frames sets the shot's frame count first (keep src/data/shots.ts in step). --variant <finish> writes one finish's
+ * take of a per-finish shot (the hero) to shot-NN/<finish>/ and lists it in the manifest's `variants`.
  * Still: writes 3840×2160 (and 1920×1080 mobile) to public/frames/shot-00/[slate-]<finish>.webp.
  * Then sets the shot ready in public/frames/manifest.json. Needs ffmpeg and ffprobe on PATH.
  */
@@ -31,7 +33,7 @@ const mb = b => `${(b / 1048576).toFixed(1)} MB`;
 
 const [shotArg, input] = process.argv.slice(2);
 const shot = Number(shotArg);
-if (!Number.isInteger(shot) || shot < 0 || shot > 10 || !input) fail('usage: node scripts/ingest.mjs <shot 0-10> <file> [options] (see the comment at the top)');
+if (!Number.isInteger(shot) || shot < 0 || shot > 99 || !input) fail('usage: node scripts/ingest.mjs <shot> <file> [options] (see the comment at the top)');
 if (!existsSync(input)) fail(`no such file: ${input}`);
 const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
 
@@ -50,9 +52,13 @@ if (shot === 0) {
   process.exit(0);
 }
 
-const entry = manifest.shots[String(shot)];
-if (!entry) fail(`shot ${shot} is not in the manifest`);
+const entry = manifest.shots[String(shot)] ??= { frames: 0, ready: false };
+if (arg('frames')) entry.frames = Number(arg('frames'));
+if (!(entry.frames > 0)) fail(`shot ${shot} has no frame count: pass --frames <n>`);
 const N = entry.frames;
+const variant = arg('variant');
+if (variant !== undefined && !FINISHES.includes(variant)) fail(`--variant must be one of ${FINISHES.join(', ')}`);
+const sub = variant ? `/${variant}` : '';
 const probe = JSON.parse(execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration:stream=width,height', '-select_streams', 'v:0', '-of', 'json', input]).toString());
 const duration = Number(probe.format.duration);
 const from = Number(arg('from') ?? 0), to = Number(arg('to') ?? duration);
@@ -61,7 +67,7 @@ const span = to - from;
 const src = probe.streams?.[0];
 if (src && (src.width < 1920 || src.height < 1080)) console.warn(`ingest: source is ${src.width}×${src.height}; frames are upscaled to 1440p (plan: upscale low-res clips first for best results)`);
 
-for (const [dir, w, h, q] of [[join(framesDir, `shot-${pad(shot, 2)}`), 2560, 1440, 80], [join(framesDir, 'mobile', `shot-${pad(shot, 2)}`), 1280, 720, 74]]) {
+for (const [dir, w, h, q] of [[join(framesDir, `shot-${pad(shot, 2)}${sub}`), 2560, 1440, 80], [join(framesDir, 'mobile', `shot-${pad(shot, 2)}${sub}`), 1280, 720, 74]]) {
   rmSync(dir, { recursive: true, force: true });
   mkdirSync(dir, { recursive: true });
   // N frames spread evenly over the segment, whatever the clip's own frame rate
@@ -69,9 +75,10 @@ for (const [dir, w, h, q] of [[join(framesDir, `shot-${pad(shot, 2)}`), 2560, 14
   let files = readdirSync(dir).filter(f => f.endsWith('.webp')).sort();
   for (let i = files.length; i < N; i++) copyFileSync(join(dir, files[files.length - 1]), join(dir, `${pad(i + 1, 4)}.webp`)); // rounding can leave one short
   files = readdirSync(dir).filter(f => f.endsWith('.webp'));
-  console.log(`shot ${pad(shot, 2)} · ${w}×${h}: ${files.length} frames, ${mb(sizeOf(dir))}`);
+  console.log(`shot ${pad(shot, 2)}${sub} · ${w}×${h}: ${files.length} frames, ${mb(sizeOf(dir))}`);
 }
 entry.ready = true;
 entry.mobile = true;
+if (variant) entry.variants = FINISHES.filter(k => k === variant || entry.variants?.includes(k));
 writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n');
-console.log(`shot ${pad(shot, 2)} marked ready in manifest.json`);
+console.log(`shot ${pad(shot, 2)}${sub} marked ready in manifest.json`);
