@@ -187,3 +187,5 @@ PAINT[15] = (g, w, h, t, o) => PAINT[0](g, w, h, t * 0.5, o);
 PAINT[16] = (g, w, h, t, o) => PAINT[0](g, w, h, 0.5 + t * 0.5, o);
 PAINT[17] = (g, w, h, _t, o) => PAINT[0](g, w, h, 0.5, { ...o, device: 'tablet' });
 PAINT[18] = (g, w, h, _t, o) => PAINT[0](g, w, h, 0.5, o);
+PAINT[19] = (g, w, h, _t, o) => PAINT[0](g, w, h, 0.5, o);
+PAINT[20] = (g, w, h, _t, o) => PAINT[0](g, w, h, 0.5, o);

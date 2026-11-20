@@ -29,5 +29,7 @@ export const SHOTS: Record<number, Shot> = {
   16: { id: 16, title: 'Turn, back to front', frames: 120, fit: 0.7, fitH: 1.1, alt: 'The phone turns from its back to its screen.' },
   17: { id: 17, title: 'Lay it down', frames: 120, fit: 0.6, fitH: 1.05, alt: 'Slate Pro tips back and lies flat on a dark stone desk under the camera, its screen a blank drawing canvas, the Quill beside it.' },
   18: { id: 18, title: 'Bass drop', frames: 120, fit: 0.8, alt: 'A deep bass note plays from the speakers on the bottom edge of the phone and water droplets on the black glass beside them leap into the air.' },
+  19: { id: 19, title: 'Into the speaker', frames: 120, fit: 0.8, alt: 'The camera glides through a speaker hole into the cut-away speaker: magnet, copper voice coil and domed diaphragm.' },
+  20: { id: 20, title: 'Bass in action', frames: 120, fit: 0.8, alt: 'A deep note: the diaphragm pumps in and out and pulses of air push out through the grille.' },
   10: { id: 10, title: 'Slate Pro edge turn', frames: 150, fit: 0.95, alt: 'Slate Pro turns edge-on to show its 5.1 mm profile, then the Quill touches the screen.' },
 };

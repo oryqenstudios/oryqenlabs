@@ -226,3 +226,9 @@ A first hero take (8 s, splash around the phone rather than filling the frame, r
 - `shot-18-bass-drop-v2.mp4`: the droplets leap higher.
 
 Request IDs for all of these are in the session log as `water-v2`, `slate-edge-v2`, `chip-dive`, `sound-bass-v2`, `slate-*`, `chip-*`, `die`.
+
+## Inside the speaker
+
+- `shot-19-into-the-speaker.mp4`: from the grille macro (`sound-grille.jpg`) through a speaker hole into the cut-away module (`speaker-cutaway.jpg`), 1080p, 5 s.
+- `shot-20-bass-in-action.mp4`: the diaphragm pumping and air pushed out through the grille, first frame only, 1080p, 5 s; the site loops it forward and back.
+Request IDs: `speaker-dive`, `speaker-bass`, `speaker-cutaway` in the session log.

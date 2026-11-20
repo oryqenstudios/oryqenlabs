@@ -5,6 +5,7 @@ import { FrameSequence } from '../sequence/FrameSequence';
 import { Readouts } from '../components/Readouts';
 import { placeSpatial, setSpatialMode, startSpatial, stopSpatial } from '../lib/spatial';
 import { sm } from '../lib/math';
+import { reducedMotion } from '../lib/tokens';
 
 const BASE = import.meta.env.BASE_URL;
 const SPECS = [
@@ -16,8 +17,9 @@ const SPECS = [
   'USB-C audio, lossless over the cable',
 ];
 
-/** 08 · Sound. Shot 18: a bass note makes water droplets leap off the glass beside the speakers. Then the speaker grille
- *  up close, and a spatial audio demo: drag the sound around the phone and hear it move around you. */
+/** 08 · Sound. Shot 18: a bass note makes water droplets leap off the glass beside the speakers. Then the camera dives
+ *  through the grille into the speaker and watches the bass in action, the grille up close, and a spatial audio demo:
+ *  drag the sound around the phone and hear it move around you. */
 export function Sound() {
   return (
     <section id="sound">
@@ -30,8 +32,40 @@ export function Sound() {
           </>
         )}
       </ScrubSection>
+      <ScrubSection length="320vh" label="Inside the speaker">
+        {p => <SpeakerStage p={p} />}
+      </ScrubSection>
       <SpatialDemo />
     </section>
+  );
+}
+
+/** Shot 19 dives through the grille into the cut-away speaker; then shot 20, the bass in action, keeps playing on a loop. */
+const INSIDE = 0.55;
+function SpeakerStage({ p }: { p: number }) {
+  const inside = p >= INSIDE;
+  const [t, setT] = useState(0);
+  useEffect(() => {
+    if (!inside || reducedMotion()) return;
+    let id = 0; const t0 = performance.now();
+    const tick = () => { setT((performance.now() - t0) / 1000); id = requestAnimationFrame(tick); };
+    id = requestAnimationFrame(tick); return () => cancelAnimationFrame(id);
+  }, [inside]);
+  const loop = 1 - Math.abs(((t / 4.2) % 2) - 1); // forward, then back: the diaphragm keeps pumping
+  const seq = inside ? 0.5 + 0.5 * loop : (p / INSIDE) * 0.5;
+  const excursion = inside ? (0.65 * Math.abs(Math.sin(t * Math.PI * 1.6))).toFixed(2) : '0.00';
+  const caption = sm(INSIDE, INSIDE + 0.08, p);
+  return (
+    <>
+      <FrameSequence shots={[19, 20]} progress={seq} />
+      <Readouts items={inside ? [['Note', '40 Hz'], ['Diaphragm travel', `±${excursion} mm`]] : [['Into the grille', `${(1.6 * sm(0, INSIDE, p)).toFixed(1)} mm`], ['Hole', '0.4 mm']]} />
+      <div className="pointer-events-none absolute grid max-w-[360px] gap-2 rounded-2xl border border-ink-line bg-ink/60 p-5 backdrop-blur-xl max-md:right-[var(--gut-r)]"
+        style={{ left: 'var(--gut-l)', bottom: 'calc(max(18px, env(safe-area-inset-bottom, 0px)) + 40px)', opacity: caption, transform: `translateY(${(1 - caption) * 12}px)` }}>
+        <span className="label">Inside the speaker · the bass, in action</span>
+        <p className="m-0 text-[clamp(1.4rem,2.4vw,1.9rem)] font-bold leading-tight tracking-[-.025em]">A magnet, a coil and a diaphragm thinner than a hair.</p>
+        <p className="m-0 text-mute">A neodymium magnet drives the copper voice coil, and the domed diaphragm pushes air out through the grille: deep notes you can feel.</p>
+      </div>
+    </>
   );
 }
 

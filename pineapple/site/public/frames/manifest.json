@@ -120,6 +120,16 @@
       "frames": 120,
       "ready": true,
       "mobile": true
+    },
+    "19": {
+      "frames": 120,
+      "ready": true,
+      "mobile": true
+    },
+    "20": {
+      "frames": 120,
+      "ready": true,
+      "mobile": true
     }
   }
 }
