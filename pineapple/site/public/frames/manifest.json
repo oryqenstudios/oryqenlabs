@@ -1,17 +1,62 @@
 {
   "ext": "webp",
   "note": "Set ready:true once a shot's frames are in public/frames/shot-NN/0001.webp … Optional phone-sized copies go in public/frames/mobile/shot-NN/ with mobile:true.",
-  "stills": { "ready": [], "mobile": false },
+  "stills": {
+    "ready": [
+      "ripen"
+    ],
+    "mobile": true
+  },
   "shots": {
-    "1": { "frames": 120, "ready": false, "mobile": false },
-    "2": { "frames": 150, "ready": false, "mobile": false },
-    "3": { "frames": 180, "ready": false, "mobile": false },
-    "4": { "frames": 150, "ready": false, "mobile": false },
-    "5": { "frames": 180, "ready": false, "mobile": false },
-    "6": { "frames": 150, "ready": false, "mobile": false },
-    "7": { "frames": 150, "ready": false, "mobile": false },
-    "8": { "frames": 120, "ready": false, "mobile": false },
-    "9": { "frames": 150, "ready": false, "mobile": false },
-    "10": { "frames": 150, "ready": false, "mobile": false }
+    "1": {
+      "frames": 120,
+      "ready": false,
+      "mobile": false
+    },
+    "2": {
+      "frames": 150,
+      "ready": false,
+      "mobile": false
+    },
+    "3": {
+      "frames": 180,
+      "ready": false,
+      "mobile": false
+    },
+    "4": {
+      "frames": 150,
+      "ready": false,
+      "mobile": false
+    },
+    "5": {
+      "frames": 180,
+      "ready": false,
+      "mobile": false
+    },
+    "6": {
+      "frames": 150,
+      "ready": false,
+      "mobile": false
+    },
+    "7": {
+      "frames": 150,
+      "ready": false,
+      "mobile": false
+    },
+    "8": {
+      "frames": 120,
+      "ready": false,
+      "mobile": false
+    },
+    "9": {
+      "frames": 150,
+      "ready": false,
+      "mobile": false
+    },
+    "10": {
+      "frames": 150,
+      "ready": false,
+      "mobile": false
+    }
   }
 }
