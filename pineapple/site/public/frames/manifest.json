@@ -15,18 +15,18 @@
     },
     "2": {
       "frames": 150,
-      "ready": false,
-      "mobile": false
+      "ready": true,
+      "mobile": true
     },
     "3": {
       "frames": 180,
-      "ready": false,
-      "mobile": false
+      "ready": true,
+      "mobile": true
     },
     "4": {
       "frames": 150,
-      "ready": false,
-      "mobile": false
+      "ready": true,
+      "mobile": true
     },
     "5": {
       "frames": 180,
