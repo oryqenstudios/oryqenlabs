@@ -9,6 +9,28 @@ npm run build      # typecheck + production build into dist/
 npm run preview    # serve dist/
 ```
 
+## Deployment
+
+Every push to `pineapple-site` (or `main`) that touches `pineapple/site/` builds the site and publishes it to GitHub Pages
+(`.github/workflows/pineapple-pages.yml`). `public/CNAME` sets the custom domain, pineappleconcept.com.
+
+One-time setup in GitHub: **Settings → Pages → Build and deployment → Source: GitHub Actions**, then enter
+`pineappleconcept.com` under **Custom domain** and tick **Enforce HTTPS** once the certificate is issued.
+
+DNS at the domain registrar:
+
+| Type | Name | Value |
+| --- | --- | --- |
+| A | @ | 185.199.108.153 |
+| A | @ | 185.199.109.153 |
+| A | @ | 185.199.110.153 |
+| A | @ | 185.199.111.153 |
+| AAAA | @ | 2606:50c0:8000::153, 2606:50c0:8001::153, 2606:50c0:8002::153, 2606:50c0:8003::153 (one record each) |
+| CNAME | www | oryqenstudios.github.io |
+
+AI frames: GitHub Pages serves up to 1 GB. When the frame sequences arrive, either commit them (remove the
+`public/frames/shot-*/` lines from `.gitignore`) or host them on a CDN and point the player at it.
+
 ## Stack
 
 Vite 5 · React 18 · TypeScript 5 · Tailwind CSS 3 · GSAP ScrollTrigger · Lenis · three.js r169 · React Three Fiber 8 · drei 9.
