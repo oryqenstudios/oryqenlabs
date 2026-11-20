@@ -67,3 +67,29 @@ Prompt:
 Still `s4-end` prompt:
 
 > Show this exact phone (first image) disassembled into its ten internal layers floating apart in one straight line along its depth axis, laid out like the second image: clear front glass, the display, the titanium frame, a dark green logic board with one square chip, a thin steel vapour chamber, a flat black battery, the camera module with its hexagonal plateau and lenses, small speakers and a haptic motor, a copper wireless-charging coil in a grey magnet ring, and the etched green-to-gold back glass. A soft glow of gold, green or amber light behind each layer. Three-quarter view. Keep the phone's design, finish, camera plateau and lenses exactly as in the reference image. Photoreal, matte black studio background unless stated, no text, no logos, no watermark.
+
+## Shot 05 · Exploded orbit
+
+`shot-05-exploded-orbit.mp4` · 1920×1080, 24 fps, 8 s · Kling 3.0 Pro image-to-video, sound off, cfg_scale 0.5. Request `01a1f9e7-91f8-754a-8bc0-7ca13142691f`.
+First frame: still `s4-end` (Qwen Image 3, request `01a1f9e0-65ad-7ed3-843d-be07d66107b8`). Last frame: still `s4-end` (Qwen Image 3, request `01a1f9e0-65ad-7ed3-843d-be07d66107b8`).
+
+Prompt:
+
+> Photoreal product cinematography. Matte black studio void (#0A0B08). One large soft key light from the upper left, a thin warm rim light from behind on the right, controlled specular highlights, no lens flare. 100 mm macro lens look with shallow depth of field. No people, no hands, no on-screen text, no logos, no watermarks. 16:9. The ten layers of the exploded Crown Pro hang perfectly still in a straight line, each with its soft coloured glow behind it. The camera makes one smooth, constant-speed 360° orbit around the stack at eye level and returns exactly to the starting composition. Nothing moves except the camera. Avoid: Layers drifting or swapping order, glows flickering, speed changes, layers changing design on the far side.
+
+## Shot 06 · Lens fly-in
+
+`shot-06-lens-fly-in.mp4` · 1920×1080, 24 fps, 6 s · Kling 3.0 Pro image-to-video, sound off, cfg_scale 0.5. Request `01a1f9e7-92a6-7af6-ae69-0055dbc53561`.
+First frame: still `s6-start` (Qwen Image 3, request `01a1f9e0-65c8-7781-a6dc-e616a3820498`). Last frame: still `s6-end` (Qwen Image 3, request `01a1f9e0-65b1-78f8-9241-d5288276988d`).
+
+Prompt:
+
+> Photoreal product cinematography. Matte black studio void (#0A0B08). One large soft key light from the upper left, a thin warm rim light from behind on the right, controlled specular highlights, no lens flare. 100 mm macro lens look with shallow depth of field. No people, no hands, no on-screen text, no logos, no watermarks. 16:9. Extreme macro. Start on the scale-shaped camera plateau of the Crown Pro, centred on the square periscope telephoto window. The camera pushes straight in along the lens axis, through the sapphire cover and into the dark lens barrel. Inside, a 45° glass prism is revealed. A beam of warm white light enters through the window, strikes the prism and folds 90° sideways, travels through a row of five precise lens elements, and lands on an image sensor that lights up green-gold. End on the glowing sensor, edge to edge. Avoid: Fantasy circuitry, glitch effects, the beam bending more than once, lens flares, text.
+
+Still `s6-start` prompt:
+
+> Extreme macro close-up of the raised hexagonal camera plateau on the back of this phone, filling the frame, centred on the square periscope telephoto window, sapphire lens covers with subtle blue-green coating reflections, shallow depth of field, studio light. Keep the phone's design, finish, camera plateau and lenses exactly as in the reference image. Photoreal, matte black studio background unless stated, no text, no logos, no watermark.
+
+Still `s6-end` prompt:
+
+> Inside a smartphone periscope camera, extreme macro: a beam of warm white light enters, strikes a 45-degree glass prism and folds 90 degrees sideways through a row of five precise lens elements onto a small image sensor that glows warm green-gold. Dark interior, glints on glass and metal, cinematic, shallow depth of field. Photoreal product photography, matte black studio void, one large soft key light from the upper left, a thin warm rim light from behind on the right, 16:9, no text, no logos, no watermark.
