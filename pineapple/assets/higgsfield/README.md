@@ -198,3 +198,22 @@ Stills are Qwen Image 3 edits (2K, 16:9, seed 37), archived as high-quality JPEG
 
 Macros (`shot-03-macro-*.jpg`) are exact crops of the reveal frame (`inputs/crop-*.jpg`), sharpened by an edit that keeps the framing, so each camera move lands precisely on its detail.
 A first hero take (8 s, splash around the phone rather than filling the frame, request `01a1fa0f-7e20-7ba1-838f-76e885bb1f6c`) and a 1080p motion test (`01a1fa17-52a0-76bd-8a2f-4c960681ef82`) were not used.
+
+## Realistic-only pass
+
+| File | What | Request |
+| --- | --- | --- |
+| `teardown-phone-exploded.png` | Photographed exploded view: ten layers, display lit | `01a1fa2d-a422-7dac-a3b5-414b4f982fbe` |
+| `teardown-phone-<layer>.jpg` | Per-layer macros: exact crops of the exploded view (`inputs/td-phone-*.jpg`), sharpened | see `td-phone-*` in the log |
+| `shot-04-exploded-view-v2.mp4` | Inside: the back separates into the exploded view (1080p, 5 s) | `01a1fa30-809c-7316-b04d-c8bd647f45e9` |
+| `shot-05-back-together.mp4` | Inside: layers rejoin, phone turns to face you (1080p, 5 s) | `01a1fa30-8097-7bbe-b6e8-b878b22ede80` |
+| `shot-15/16-turn-*-ripen.mp4` | 360° turntable, ripen: front to back, back to front, from `hero` fronts and `reference-back-turn*.png` | `01a1fa30-8087-7af4-aed6-d56c1ef3ada8`, `01a1fa30-81ae-7054-85df-e9073e29a87a` |
+| `shot-15/16-turn-*-rind.mp4` | 360° turntable, rind: front to back, back to front, from `hero` fronts and `reference-back-turn*.png` | `01a1fa3d-4f5b-7bb3-b992-4c3d7e180ef9`, `01a1fa3d-4e79-7d97-8708-7e6342932a75` |
+| `shot-15/16-turn-*-golden.mp4` | 360° turntable, golden: front to back, back to front, from `hero` fronts and `reference-back-turn*.png` | `01a1fa3d-4f8f-7249-bf06-4a7db4472fff`, `01a1fa3d-4ef3-7473-ad6c-52a87e6cd567` |
+| `shot-15/16-turn-*-green.mp4` | 360° turntable, green: front to back, back to front, from `hero` fronts and `reference-back-turn*.png` | `01a1fa3d-4f4b-7c7e-9fe5-a2187a224e4f`, `01a1fa3d-4f54-7743-9c45-d888ca09af54` |
+| `shot-15/16-turn-*-core.mp4` | 360° turntable, core: front to back, back to front, from `hero` fronts and `reference-back-turn*.png` | `01a1fa3d-4f8f-7ce1-ad71-aa70f65d1b0f`, `01a1fa3d-4f50-7d56-ad84-880def04e94d` |
+| `shot-17-slate-lay-down.mp4` | Slate Pro settles flat on a desk, screen to a blank canvas (`shot-17-slate-flat.jpg`) | `01a1fa36-b85f-76af-8bfb-1e8a416621bf` |
+| `shot-18-bass-drop.mp4` | Sound: water droplets leap off the glass beside the speakers (from `sound-start.jpg`) | `01a1fa3e-36c9-71fe-bada-c6276b87c2be` |
+| `sound-grille.jpg` | Macro of the speaker grille | `01a1fa3d-905f-7a8f-aaac-c782c128448d` |
+| `camera-zoom-0..3.jpg` | The viewfinder's four lens photos: plantation, farmhouse, porch, basket | `01a1fa3b-5f87-7dfe-8c25-967b488c17d7` … |
+| `pair-crown-*.jpg`, `pair-zest-*.jpg`, `pair-slate-*.jpg` | Front-and-back product shots: Crown Pro and Zest composited from single studio stills; Slate Pro generated | see `zest-*`, `slate-*` in the log |

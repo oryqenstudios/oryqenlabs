@@ -5,7 +5,7 @@ import { sound } from '../lib/sound';
 
 export const NAV_LINKS: [string, string][] = [
   ['drop', 'Crown Pro'], ['reveal', 'Design'], ['finish', 'Finishes'], ['inside', 'Inside'], ['camera', 'Camera'],
-  ['chip', 'Chip'], ['water', 'Durability'], ['slate', 'Slate Pro'], ['compare', 'Compare'],
+  ['chip', 'Chip'], ['sound', 'Sound'], ['water', 'Durability'], ['slate', 'Slate Pro'], ['compare', 'Compare'],
 ];
 export const FROM_PRICE = '$1,199'; // placeholder, see Compare
 

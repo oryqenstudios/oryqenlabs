@@ -6,6 +6,7 @@ import { SpiralBackground } from './components/SpiralBackground';
 import { Hero } from './sections/Hero';
 import { Design, Finish, Camera, Chip, Durability } from './sections/Cinematic';
 import { Reveal } from './sections/Reveal';
+import { Sound } from './sections/Sound';
 import { Inside } from './sections/Inside';
 import { Numbers } from './sections/Numbers';
 import { Slate } from './sections/Slate';
@@ -49,6 +50,7 @@ export default function App() {
         <Numbers />
         <Camera />
         <Chip />
+        <Sound />
         <Durability />
         <Slate />
         <Compare />

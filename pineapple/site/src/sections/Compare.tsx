@@ -1,7 +1,5 @@
 import { useState } from 'react';
 import { Chips } from '../components/Chips';
-import { FrameSequence } from '../sequence/FrameSequence';
-import { DeviceAnchor } from '../components/DeviceAnchor';
 import { FINISHES, ZEST, PHONE_FINISHES, TABLET_FINISHES, swatch, type FinishKey, type ZestKey } from '../data/finishes';
 
 type Model = 'crown' | 'zest' | 'slate';
@@ -26,7 +24,10 @@ const ROWS: [string, string, string, string][] = [
 ];
 const finName = (k: FinishKey | ZestKey) => (k in FINISHES ? FINISHES[k as FinishKey].name : ZEST[k as ZestKey].name);
 
-/** 10 · Compare & buy, with the live 3D configurator. */
+const BASE = import.meta.env.BASE_URL;
+const FINS_OF = (m: Model) => MODELS[m].fins;
+
+/** 10 · Compare & buy. The configurator shows a studio photograph of each model and colour, front and back. */
 export function Compare() {
   const [model, setModel] = useState<Model>('crown');
   const [fin, setFin] = useState<FinishKey | ZestKey>('ripen');
@@ -36,7 +37,7 @@ export function Compare() {
   return (
     <section id="compare" className="light py-[16vh]">
       <div className="wrap">
-        <p className="label">10 · Compare</p>
+        <p className="label">11 · Compare</p>
         <h2 className="mb-2.5 mt-3.5 text-[clamp(2.4rem,6vw,4.6rem)] font-bold leading-[1.02] tracking-[-.035em]">Pick your<br /><span className="grad">pineapple.</span></h2>
         <p className="m-0 text-mute-light">Choose a model, finish and storage.</p>
 
@@ -55,10 +56,19 @@ export function Compare() {
         </div>
 
         <div className="mt-20 grid items-center gap-10 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
-          <div className="relative aspect-square max-w-full overflow-hidden rounded-3xl bg-ink">
-            <DeviceAnchor id="configurator" className="absolute inset-0" label={`${M.name} in ${finName(f)}, drag to turn it`}
-              spec={{ device: model === 'slate' ? 'tablet' : 'phone', finish: f, rot: [0.12, Math.PI - 0.45], fill: model === 'slate' ? 0.72 : 0.8, interactive: true }}
-              fallback={<FrameSequence shots={[0]} progress={0.5} hud={false} opts={{ fin: f, device: model === 'slate' ? 'tablet' : 'phone' }} />} />
+          <div className="relative aspect-[4/5] max-w-full overflow-hidden rounded-3xl bg-[#040302] md:aspect-[16/10]">
+            {(Object.keys(MODELS) as Model[]).flatMap(m => FINS_OF(m).map(k => {
+              const on = m === model && k === f;
+              return (
+                <picture key={`${m}-${k}`}>
+                  <source media="(max-width: 760px)" srcSet={`${BASE}frames/mobile/compare/${m}-${k}.webp`} />
+                  <img src={`${BASE}frames/compare/${m}-${k}.webp`} alt={on ? `${MODELS[m].name} in ${finName(k)}, front and back.` : ''} aria-hidden={!on}
+                    loading={on ? 'eager' : 'lazy'} decoding="async"
+                    className="absolute inset-0 h-full w-full object-cover transition-[opacity,transform] duration-700 ease-brand max-md:object-contain"
+                    style={{ opacity: on ? 1 : 0, transform: on ? 'scale(1)' : 'scale(1.025)' }} />
+                </picture>
+              );
+            }))}
           </div>
           <div className="grid gap-[22px]">
             <h3 className="m-0 text-[2rem] tracking-[-.03em]">{M.name}</h3>

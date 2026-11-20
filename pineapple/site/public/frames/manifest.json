@@ -34,12 +34,12 @@
       "mobile": true
     },
     "4": {
-      "frames": 150,
+      "frames": 120,
       "ready": true,
       "mobile": true
     },
     "5": {
-      "frames": 180,
+      "frames": 120,
       "ready": true,
       "mobile": true
     },
@@ -85,6 +85,40 @@
     },
     "14": {
       "frames": 144,
+      "ready": true,
+      "mobile": true
+    },
+    "15": {
+      "frames": 108,
+      "ready": true,
+      "mobile": true,
+      "variants": [
+        "ripen",
+        "rind",
+        "golden",
+        "green",
+        "core"
+      ]
+    },
+    "16": {
+      "frames": 120,
+      "ready": true,
+      "mobile": true,
+      "variants": [
+        "ripen",
+        "rind",
+        "golden",
+        "green",
+        "core"
+      ]
+    },
+    "17": {
+      "frames": 120,
+      "ready": true,
+      "mobile": true
+    },
+    "18": {
+      "frames": 120,
       "ready": true,
       "mobile": true
     }
