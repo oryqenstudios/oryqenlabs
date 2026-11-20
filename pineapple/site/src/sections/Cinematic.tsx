@@ -9,6 +9,7 @@ import { setAccent } from '../lib/tokens';
 import { pad, sm } from '../lib/math';
 import { inspect } from '../lib/events';
 import { DeviceAnchor } from '../components/DeviceAnchor';
+import { FinishStills } from '../components/FinishStills';
 
 /** 02 · Frozen. Shot 3, with "Recolour the burst": a filter on the frames; the page accent follows. */
 const PALETTES = [
@@ -101,21 +102,21 @@ function DesignLive() {
   );
 }
 
-/** 04 · Finish. Master stills (shot 0) per finish; Ripen turns from green to gold as you scroll. */
+/** 04 · Finish. Photoreal AI master stills (shot 00), one per finish, crossfaded as you pick. */
 export function Finish() {
   const [fin, setFin] = useState<FinishKey>('ripen');
   const f = FINISHES[fin];
   return (
     <section id="finish">
-      <SectionIntro label="04 · Finish" line1="Five finishes." line2="One ripens." instruction="Pick a finish. Scroll to tilt it, and watch Ripen turn from green to gold." />
-      <ScrubSection length="220vh" label="Finish picker" live>
+      <SectionIntro label="04 · Finish" line1="Five finishes." line2="One ripens." instruction="Pick a finish to see it in the studio." />
+      <ScrubSection length="200vh" label="Finish picker">
         {p => (
           <>
-            <DeviceAnchor id="finish" className="absolute inset-x-0 top-[30%] mx-auto h-[54%] max-w-[700px] md:top-[12%] md:h-[70%]" label={`Crown Pro in ${f.name}`}
-              spec={{ device: 'phone', finish: fin, rot: [0.08, Math.PI + p * (Math.PI / 3)], fill: 0.9 }}
-              fallback={<FrameSequence shots={[0]} progress={p} opts={{ fin }} hud={false} />} />
-            <div className="absolute grid max-w-[340px] gap-3 max-md:right-[var(--gut-r)]" style={{ left: 'var(--gut-l)', top: 84 }}>
-              <span className="label">Viewing angle {Math.round(p * 60)}°</span>
+            <FinishStills finish={fin} progress={p} />
+            {/* phones: the phone fills the frame, so the copy gets a scrim */}
+            <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-[46%] md:hidden" style={{ background: 'linear-gradient(180deg, rgba(10,11,8,.86) 0%, rgba(10,11,8,.55) 55%, rgba(10,11,8,0) 100%)' }} />
+            <div className="absolute grid max-w-[340px] gap-3 [text-shadow:0_2px_18px_rgba(10,11,8,.6)] max-md:right-[var(--gut-r)]" style={{ left: 'var(--gut-l)', top: 84 }}>
+              <span className="label">Finish {String(PHONE_FINISHES.indexOf(fin) + 1).padStart(2, '0')} / 05</span>
               <span className="text-[clamp(2rem,4.4vw,3.4rem)] font-bold leading-none tracking-[-.035em]">{f.name}</span>
               <p className="m-0 text-mute">{f.desc}</p>
             </div>

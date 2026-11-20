@@ -151,3 +151,20 @@ First frame: still `s10-master` (Qwen Image 3, request `01a1f9e1-2c39-7682-9250-
 Prompt:
 
 > Photoreal product cinematography. Matte black studio void (#0A0B08). One large soft key light from the upper left, a thin warm rim light from behind on the right, controlled specular highlights, no lens flare. 100 mm macro lens look with shallow depth of field. No people, no hands, no on-screen text, no logos, no watermarks. 16:9. Start face-on to the Slate Pro, screen on with concentric gold and green rings. The camera orbits slowly to the side until the tablet is exactly edge-on, its 5.1 mm profile a thin bright line of aluminium. Then the Quill enters from the upper right and its fine tip touches the glass; a soft ring of light ripples out from the point of contact. End edge-on with the Quill tip touching the screen. Avoid: The tablet bending or warping, a keyboard appearing, hands, the stylus looking like a pencil or a pen with a clip.
+
+## Shot 00 · Finish stills (Rind, Golden Flesh, Crown Green, Core)
+
+`shot-00-finish-*.png` · 2048×1152 · Qwen Image 3 edit of the master (seed 37): recolour only, same framing and design.
+Used by the Finish section (04), which crossfades between them.
+
+- `rind` · request `01a1f9f8-dd06-7fbb-82fe-811fc15eadb6`
+  > Recolour this phone to a new finish: deep olive-bronze frosted back glass, like pineapple skin, with a dark bronze titanium frame and a matching olive-bronze camera plateau. Change only those colours. Keep everything else exactly the same: the same camera angle, position, size and framing, the same phone shape, the same hexagonal camera plateau and three lenses, the same etched scale pattern on the back, the same lighting and the same black background.
+
+- `golden` · request `01a1f9f8-dd35-7ff8-97d7-d67aaabda533`
+  > Recolour this phone to a new finish: warm buttery yellow-gold frosted back glass, like the flesh of a ripe pineapple, with a pale gold titanium frame and a matching gold camera plateau. Change only those colours. Keep everything else exactly the same: the same camera angle, position, size and framing, the same phone shape, the same hexagonal camera plateau and three lenses, the same etched scale pattern on the back, the same lighting and the same black background.
+
+- `core` · request `01a1f9f8-dd15-7330-afc9-a11093ae4a22`
+  > Recolour this phone to a new finish: warm cream frosted back glass, pale as the core of a pineapple, with a light champagne titanium frame and a matching cream camera plateau. Change only those colours. Keep everything else exactly the same: the same camera angle, position, size and framing, the same phone shape, the same hexagonal camera plateau and three lenses, the same etched scale pattern on the back, the same lighting and the same black background.
+
+- `green` · request `01a1f9f8-dd1d-73f8-9356-5f18cc16f152`
+  > Recolour this phone to a new finish: deep leaf-green frosted back glass, like a pineapple crown, with a dark green-grey titanium frame and a matching green camera plateau. Change only those colours. Keep everything else exactly the same: the same camera angle, position, size and framing, the same phone shape, the same hexagonal camera plateau and three lenses, the same etched scale pattern on the back, the same lighting and the same black background.
