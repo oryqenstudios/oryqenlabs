@@ -13,8 +13,11 @@ export function Hero() {
         <>
           <FrameSequence shots={[1, 2]} progress={p} />
           <Droplets />
-          <div className="pointer-events-none absolute inset-0 grid content-start justify-items-center gap-2.5 text-center"
-            style={{ paddingTop: 'clamp(70px,13vh,140px)', paddingLeft: 'var(--gut-l)', paddingRight: 'var(--gut-r)' }}>
+          {/* the headline leads, then steps aside as you scroll so the footage plays unobstructed */}
+          <div aria-hidden="true" className="pointer-events-none absolute inset-0"
+            style={{ opacity: 1 - sm(0.02, 0.14, p), background: 'radial-gradient(70% 42% at 50% 30%, rgba(10,11,8,.62), rgba(10,11,8,0) 72%)' }} />
+          <div className="pointer-events-none absolute inset-0 grid content-start justify-items-center gap-2.5 text-center [text-shadow:0_2px_24px_rgba(10,11,8,.55)]"
+            style={{ paddingTop: 'clamp(70px,13vh,140px)', paddingLeft: 'var(--gut-l)', paddingRight: 'var(--gut-r)', opacity: 1 - sm(0.02, 0.14, p), transform: `translateY(${-sm(0.02, 0.14, p) * 24}px)`, visibility: p > 0.15 ? 'hidden' : undefined }}>
             <LogoButton id="hero-logo" className="pointer-events-auto h-16 w-16" label="PINEAPPLE logo. Click to burst it; press and hold to charge a bigger burst." />
             <p className="label">01 · The drop</p>
             <h1 className="m-0 text-[clamp(3rem,10.5vw,8.6rem)] font-extrabold leading-[.92] tracking-[-.05em]">PINEAPPLE <span className="grad pr-[.04em]">Crown</span></h1>

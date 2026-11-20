@@ -16,3 +16,17 @@ Prompt:
 Negative prompt:
 
 > Extra lenses, lenses outside the plateau, a round or square plateau, visible logos, text on the screen, reflections of a studio or a photographer.
+
+## Shot 01 · Juice drop
+
+`shot-01-end-frame.png` · 2048×1152 · Qwen Image 3 edit (`alibaba/qwen-image-3/edit`) of the master, adding the drop at
+the moment of impact. Request `01a1f9d0-61e6-7ffb-b507-c7fb6f6e9761`.
+
+`shot-01-juice-drop.mp4` · 1920×1080, 24 fps, 5 s · Kling 3.0 Pro image-to-video (`kling-video/v3.0/pro/image-to-video`),
+first frame = master, last frame = the end frame above, sound off, cfg_scale 0.5. Request `01a1f9d0-db6c-7da2-add8-e18d543a904a`.
+Ingested as 120 frames. Note: the drop lands on the top edge beside the camera plateau rather than on it; a retake
+with a corrected end frame would match the shot list more closely.
+
+Prompt:
+
+> Photoreal product cinematography. Matte black studio void (#0A0B08). One large soft key light from the upper left, a thin warm rim light from behind on the right, controlled specular highlights, no lens flare. 100 mm macro lens look with shallow depth of field. No people, no hands, no on-screen text, no logos, no watermarks. 16:9. Locked camera with a very slow push-in. The Crown Pro stands upright in the Ripen finish, three-quarter back view, camera plateau nearest the lens. A single thick drop of golden pineapple juice forms at the top of the frame, stretches on a thin glossy thread, lets go, and falls in slow motion straight onto the top of the camera plateau. The juice is translucent amber-gold with internal caustics and a few suspended pulp fibres. End on the exact moment of contact: the drop flattening against the plateau, a thin crown of liquid just starting to lift. The phone does not move. Avoid: Splashes before impact, liquid on the lenses before contact, the phone tilting or turning, camera shake, extra lenses, any change to the plateau shape.

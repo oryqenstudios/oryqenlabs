@@ -10,8 +10,8 @@
   "shots": {
     "1": {
       "frames": 120,
-      "ready": false,
-      "mobile": false
+      "ready": true,
+      "mobile": true
     },
     "2": {
       "frames": 150,

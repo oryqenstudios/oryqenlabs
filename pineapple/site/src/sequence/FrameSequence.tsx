@@ -28,7 +28,8 @@ export function FrameSequence({ shots, progress, opts, filter, hud = true, class
       if (!el) return;
       (el.children[1] as HTMLElement).textContent = `Shot ${pad(shot.id, 2)} · ${shot.title}`;
       (el.children[2] as HTMLElement).textContent = shot.id === 0 ? 'Still' : `Frame ${pad(frame + 1, 3)} / ${shot.frames}`;
-      (el.children[0] as HTMLElement).hidden = real;
+      // the label is a production aid for placeholder slots; real footage plays clean
+      el.hidden = real;
     };
     const p = new SequencePlayer(canvas.current!, shots, opts, onFrame);
     player.current = p;
