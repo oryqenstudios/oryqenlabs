@@ -9,6 +9,8 @@ import { chooseFinish, useFinish } from '../lib/finish';
 import { pad, sm } from '../lib/math';
 import { inspect } from '../lib/events';
 import { Viewfinder } from '../components/Viewfinder';
+import { Teardown } from './Teardown';
+import { CHIP } from '../data/chip';
 
 /** 03 · Design. Shot 8: raking light across the etched back. Details open in the live breakdown. */
 export function Design() {
@@ -123,7 +125,8 @@ export function Camera() {
   );
 }
 
-/** 07 · Inside the chip. Shot 7; performance numbers count up with scroll. */
+/** 07 · Inside the chip. Shot 7 dives from the package into the bare die; performance numbers count up with scroll.
+ *  Then the die, photographed: pick a block and the camera moves in on its finest structure. */
 export function Chip() {
   return (
     <section id="chip">
@@ -139,6 +142,7 @@ export function Chip() {
           );
         }}
       </ScrubSection>
+      <Teardown source={CHIP} copy={{ id: 'die', label: 'Nectar N7 Pro · the die, photographed', title: 'Every block,', accent: 'up close.', blurb: 'Pick a block and the camera moves in on the silicon. Move over the photo to steer. Numbers mark the structures; the panel lists every spec.', unit: 'blocks' }} />
     </section>
   );
 }

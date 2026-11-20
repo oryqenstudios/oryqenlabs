@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { DEVICES, type DeviceKey } from '../data/devices';
-import { TEARDOWN, type Marker } from '../data/teardown';
-import { onInspect } from '../lib/events';
-import { scrollToTarget } from '../lib/scroll';
+import { DEVICES, type DeviceKey, type Layer } from '../data/devices';
+import { TEARDOWN, type Marker, type Part } from '../data/teardown';
 import { isSmallScreen, reducedMotion } from '../lib/tokens';
 import { pad, sm } from '../lib/math';
 
@@ -12,21 +10,27 @@ const IN_MS = 1500, OUT_MS = 1100;
 const glide = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 /** Devices whose breakdown has been photographed. */
 const SHOT = (Object.keys(TEARDOWN) as DeviceKey[]);
-const img = (device: DeviceKey, id?: string) =>
-  `${BASE}frames/${isSmallScreen() ? 'mobile/' : ''}teardown/${device}${id ? `/${id}` : ''}.webp`;
+const img = (dir: string, id?: string) =>
+  `${BASE}frames/${isSmallScreen() ? 'mobile/' : ''}${dir}${id ? `/${id}` : ''}.webp`;
+
+/** Any photographed subject to explore: its parts (names, stories, specs), where each sits in the photo, and where the
+ *  photos live (frames/<dir>.webp and frames/<dir>/<part>.webp). */
+export interface ExploreSource { name: string; layers: Layer[]; parts: Record<string, Part>; dir: string }
+interface Copy { id: string; label: string; title: string; accent: string; blurb: string; unit: string }
+const TEARDOWN_COPY: Copy = { id: 'closeup', label: 'Hands-on · every part photographed', title: 'Every part,', accent: 'up close.', blurb: 'Pick a layer and the camera moves in and travels along it. Move over the photo to steer. Numbers mark the small parts; the panel lists every spec.', unit: 'layers' };
 
 /**
  * The hands-on breakdown, photographed. Every layer of the exploded view is a real photograph: pick one and the
  * camera glides in until it fills the stage, a sharper macro of that exact part fades in, and numbered callouts
  * mark its small parts. The panel lists every spec. Design's detail chips open layers here too.
  */
-export function Teardown() {
+export function Teardown({ source, copy = TEARDOWN_COPY }: { source?: ExploreSource; copy?: Copy } = {}) {
   const [device, setDevice] = useState<DeviceKey>('phone');
   const [sel, setSel] = useState(-1);
   const [q, setQ] = useState(0);
   const qRef = useRef(0), raf = useRef(0), stage = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ w: 16, h: 9 });
-  const layers = DEVICES[device].layers, data = TEARDOWN[device]!;
+  const layers = source?.layers ?? DEVICES[device].layers, data = source ?? TEARDOWN[device]!, dir = source?.dir ?? `teardown/${device}`, subject = source?.name ?? DEVICES[device].name;
   const [shown, setShown] = useState(-1); // the layer the camera is on (lags `sel` while it moves between layers)
   const [pan, setPan] = useState(0); // 0 = top of the part, 1 = bottom; the camera drifts down it, or follows the pointer
   const steer = useRef(0); // until this time the pointer steers the pan instead of the drift
@@ -56,15 +60,6 @@ export function Teardown() {
   }, [shown, tween]);
 
   const switchDevice = (d: DeviceKey) => { cancelAnimationFrame(raf.current); qRef.current = 0; setQ(0); setSel(-1); setShown(-1); setDevice(d); };
-
-  // Design's chips (and anything else) can ask for a layer
-  useEffect(() => onInspect(({ device: d, layerId }) => {
-    if (!TEARDOWN[d]) return;
-    const i = DEVICES[d].layers.findIndex(l => l.id === layerId);
-    if (d !== device) switchDevice(d);
-    scrollToTarget('#breakdown');
-    setTimeout(() => open(i), d !== device ? 700 : 500);
-  }), [device, open]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (sel < 0) return;
@@ -110,15 +105,15 @@ export function Teardown() {
   const L = sel >= 0 ? layers[sel] : null;
 
   return (
-    <section id="breakdown" aria-label="Take it apart" className="relative py-[clamp(48px,8vh,96px)]">
+    <section id={copy.id} aria-label={`${copy.title} ${copy.accent}`} className="relative py-[clamp(48px,8vh,96px)]">
       <div className="wrap grid gap-5">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="grid gap-2">
-            <span className="label">Hands-on · every part photographed</span>
-            <h2 className="m-0 text-[clamp(2rem,4.6vw,3.6rem)] font-bold leading-[.98] tracking-[-.04em]">Every part, <span className="grad">up close.</span></h2>
-            <p className="m-0 max-w-[560px] text-mute">Pick a layer and the camera moves in and travels along it. Move over the photo to steer. Numbers mark the small parts; the panel lists every spec.</p>
+            <span className="label">{copy.label}</span>
+            <h2 className="m-0 text-[clamp(2rem,4.6vw,3.6rem)] font-bold leading-[.98] tracking-[-.04em]">{copy.title} <span className="grad">{copy.accent}</span></h2>
+            <p className="m-0 max-w-[560px] text-mute">{copy.blurb}</p>
           </div>
-          {SHOT.length > 1 && <div className="chips flex gap-2" role="group" aria-label="Device">
+          {!source && SHOT.length > 1 && <div className="chips flex gap-2" role="group" aria-label="Device">
             {SHOT.map(d => (
               <button key={d} type="button" className="chip" aria-pressed={device === d} onClick={() => switchDevice(d)}>{DEVICES[d].name}</button>
             ))}
@@ -129,11 +124,11 @@ export function Teardown() {
           <div ref={stage} className="relative aspect-[16/9] w-full overflow-hidden rounded-[22px] border border-ink-line bg-[#050403]"
             onPointerMove={e => { if (e.pointerType === 'mouse' || e.buttons) steerTo(e.clientY); }} style={{ touchAction: arrivedNow ? 'pan-x' : undefined }}>
             <div className="absolute left-0 top-0 h-full w-full origin-top-left will-change-transform" style={{ transform: `translate(${tx}px, ${ty}px) scale(${s})` }}>
-              <img src={img(device)} alt={`${DEVICES[device].name}, exploded into its ${layers.length} layers.`} className="absolute inset-0 h-full w-full object-cover" decoding="async" />
+              <img src={img(dir)} alt={source ? `${subject}, photographed.` : `${subject}, exploded into its ${layers.length} layers.`} className="absolute inset-0 h-full w-full object-cover" decoding="async" />
               {layers.map((l, i) => {
                 const r = data.parts[l.id]?.rect; if (!r) return null;
                 return (
-                  <img key={l.id} src={img(device, l.id)} alt="" aria-hidden="true" loading="lazy" decoding="async"
+                  <img key={l.id} src={img(dir, l.id)} alt="" aria-hidden="true" loading="lazy" decoding="async"
                     className="absolute object-cover" style={{ left: `${r[0] * 100}%`, top: `${r[1] * 100}%`, width: `${(r[2] - r[0]) * 100}%`, height: `${(r[3] - r[1]) * 100}%`, opacity: i === shown ? sm(0.55, 1, q) : 0 }} />
                 );
               })}
@@ -147,7 +142,7 @@ export function Teardown() {
               const at = toScreen((r[0] + r[2]) / 2, r[1] + (r[3] - r[1]) * 0.08);
               const vis = 1 - sm(0, 0.25, q);
               return (
-                <button key={l.id} type="button" onClick={() => open(i)} tabIndex={vis > 0.5 ? 0 : -1} aria-label={`Open layer ${i + 1}: ${l.name}`}
+                <button key={l.id} type="button" onClick={() => open(i)} tabIndex={vis > 0.5 ? 0 : -1} aria-label={`Open ${copy.unit === 'layers' ? 'layer' : 'part'} ${i + 1}: ${l.name}`}
                   className="group absolute grid h-9 w-9 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full"
                   style={{ ...at, opacity: vis, pointerEvents: vis > 0.5 ? 'auto' : 'none' }}>
                   <span className="grid h-6 w-6 place-items-center rounded-full border border-cream/80 bg-ink/60 font-mono text-[.66rem] text-cream shadow-[0_2px_14px_rgba(5,4,3,.7)] backdrop-blur-md transition-transform group-hover:scale-110">{pad(i + 1, 2)}</span>
@@ -174,10 +169,10 @@ export function Teardown() {
             })}
 
             {sel >= 0 && (
-              <button type="button" onClick={() => open(-1)} className="chip absolute left-3 top-3 !bg-ink/70 backdrop-blur-md">← All layers</button>
+              <button type="button" onClick={() => open(-1)} className="chip absolute left-3 top-3 !bg-ink/70 backdrop-blur-md">← All {copy.unit}</button>
             )}
             <span className="pointer-events-none absolute bottom-3 right-4 font-mono text-[.62rem] uppercase tracking-[.14em] text-mute">
-              {L ? `${pad(sel + 1, 2)} / ${layers.length} · ${L.mm}` : `${layers.length} layers · tap one`}
+              {L ? `${pad(sel + 1, 2)} / ${layers.length} · ${L.mm}` : `${layers.length} ${copy.unit} · tap one`}
             </span>
           </div>
 
@@ -185,7 +180,7 @@ export function Teardown() {
           <aside className="grid content-start gap-3 rounded-[22px] border border-ink-line bg-ink-2/70 p-5 backdrop-blur-md" aria-live="polite">
             {L ? (
               <>
-                <span className="label">Layer {pad(sel + 1, 2)} of {layers.length}</span>
+                <span className="label">{copy.unit === 'layers' ? 'Layer' : 'Part'} {pad(sel + 1, 2)} of {layers.length}</span>
                 <h3 className="m-0 text-[1.7rem] font-bold leading-tight tracking-[-.03em]">{L.name}{L.sub && <span className="block text-[1rem] font-semibold text-mute">{L.sub}</span>}</h3>
                 <p className="m-0 text-mute">{L.story}</p>
                 <ul className="m-0 grid list-none gap-2 p-0 text-[.92rem]">
@@ -204,7 +199,7 @@ export function Teardown() {
               </>
             ) : (
               <>
-                <span className="label">{DEVICES[device].name} · {layers.length} layers</span>
+                <span className="label">{subject} · {layers.length} {copy.unit}</span>
                 <ol className="m-0 grid list-none gap-1 p-0">
                   {layers.map((l, i) => (
                     <li key={l.id}>

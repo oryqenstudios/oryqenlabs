@@ -114,8 +114,7 @@
     },
     "17": {
       "frames": 120,
-      "ready": true,
-      "mobile": true
+      "ready": false
     },
     "18": {
       "frames": 120,

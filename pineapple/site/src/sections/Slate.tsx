@@ -6,23 +6,26 @@ import { Readouts } from '../components/Readouts';
 import { Chips } from '../components/Chips';
 import { mix } from '../sequence/placeholders';
 import { coverRect } from '../sequence/player';
-import { SHOTS } from '../data/shots';
-import { clamp, sm } from '../lib/math';
+import { sm } from '../lib/math';
+import { isSmallScreen } from '../lib/tokens';
 
+/** Inks that read on the paper page. */
 const INKS = [
   { value: 'ripen', label: 'Ripen', swatch: 'linear-gradient(90deg,#6fa43f,#f0b53a)' },
-  { value: '#f0cf6a', label: 'Golden Flesh', swatch: '#f0cf6a' },
-  { value: '#5f9a45', label: 'Crown Green', swatch: '#5f9a45' },
-  { value: '#efe6c8', label: 'Core', swatch: '#efe6c8' },
-  { value: '#ef6f8a', label: 'Guava', swatch: '#ef6f8a' },
+  { value: '#d29a1e', label: 'Golden Flesh', swatch: '#d29a1e' },
+  { value: '#3f7a35', label: 'Crown Green', swatch: '#3f7a35' },
+  { value: '#5a4b2d', label: 'Rind', swatch: '#5a4b2d' },
+  { value: '#d9506f', label: 'Guava', swatch: '#d9506f' },
+  { value: '#1c1d1a', label: 'Charcoal', swatch: '#1c1d1a' },
 ];
+const BASE = import.meta.env.BASE_URL;
 
-/** 09 · Slate Pro. Shot 10 (edge turn). Then shot 17 lays the tablet down flat under the camera, and visitors draw on
- *  its screen with the Quill: the drawing surface sits exactly over the screen in the photograph. */
+/** 10 · Slate Pro. Shot 10 (edge turn). Then the screen turns into a paper drawing page and visitors draw on it with
+ *  the Quill: the drawing surface sits exactly over the screen in the photograph. */
 export function Slate() {
   return (
     <section id="slate">
-      <SectionIntro label="10 · Slate Pro" line1="Thirteen inches." line2="5.1 mm thin." instruction="Scroll to turn it edge-on and lay it down. Then draw on its screen." />
+      <SectionIntro label="10 · Slate Pro" line1="Thirteen inches." line2="5.1 mm thin." instruction="Scroll to turn it edge-on. Then its screen becomes a page: draw on it." />
       <ScrubSection length="220vh" label="Slate Pro edge turn">
         {p => (
           <>
@@ -36,9 +39,10 @@ export function Slate() {
   );
 }
 
-/** The screen of the tablet in shot 17's last frame (0–1 of the frame: left, top, right, bottom). */
-const SCREEN = [0.235, 0.108, 0.771, 0.881] as const;
-const LIVE = 0.5;
+/** The tablet's screen in the two stills (0–1 of the frame: left, top, right, bottom); the stills differ only there. */
+const SCREEN = [0.2344, 0.1076, 0.7715, 0.8819] as const;
+const FIT = 0.6, FIT_H = 1.05;
+const TURN = [0.22, 0.42] as const, LIVE = 0.44; // the wallpaper turns into the page, then you draw
 
 function QuillPad() {
   return (
@@ -72,7 +76,6 @@ function PadStage({ p }: { p: number }) {
       for (const ev of e.getCoalescedEvents?.() ?? [e]) {
         const p = pt(ev), k = inkRef.current;
         g.strokeStyle = k === 'ripen' ? mix('#6fa43f', '#f0b53a', (Math.sin(performance.now() / 600) + 1) / 2) : k;
-        g.shadowColor = g.strokeStyle; g.shadowBlur = 4 * Math.min(devicePixelRatio || 1, 2); // ink glows a little on the lit screen
         g.lineWidth = (1.2 + p.p * 9 + p.tilt * 0.06) * Math.min(devicePixelRatio || 1, 2); g.lineCap = 'round'; g.lineJoin = 'round';
         g.beginPath(); g.moveTo(last.x, last.y); g.lineTo(p.x, p.y); g.stroke(); last = p;
       }
@@ -82,15 +85,21 @@ function PadStage({ p }: { p: number }) {
     return () => { ro.disconnect(); cv.removeEventListener('pointerdown', down); cv.removeEventListener('pointermove', move); cv.removeEventListener('pointerup', up); cv.removeEventListener('pointercancel', up); };
   }, []);
   const clear = () => { const cv = c.current!; cv.getContext('2d')!.clearRect(0, 0, cv.width, cv.height); setDrawn(false); };
-  const s17 = SHOTS[17], r = coverRect(size.w, size.h, 2048, 1152, s17.fit, s17.fitH);
+  const r = coverRect(size.w, size.h, 2048, 1152, FIT, FIT_H);
+  const turn = sm(TURN[0], TURN[1], p);
+  // the page spreads from the Quill's tip, beside the screen's lower right
+  const ox = r.x + 0.775 * r.w, oy = r.y + 0.8 * r.h, reach = Math.hypot(size.w, size.h);
+  const pic = (n: string) => `${BASE}frames/${isSmallScreen() ? 'mobile/' : ''}slate/${n}.webp`;
   const box = { left: r.x + SCREEN[0] * r.w, top: r.y + SCREEN[1] * r.h, width: (SCREEN[2] - SCREEN[0]) * r.w, height: (SCREEN[3] - SCREEN[1]) * r.h };
   return (
     <div ref={stage} className="absolute inset-0">
-      <FrameSequence shots={[17]} progress={clamp(p / LIVE, 0, 1)} />
-      <canvas ref={c} aria-label="Drawing surface on the Slate Pro screen" className="absolute cursor-crosshair touch-none"
+      <img src={pic('front')} alt="Slate Pro, its screen showing a wallpaper of gold and green rings, the Quill beside it." className="absolute max-w-none" style={{ left: r.x, top: r.y, width: r.w, height: r.h }} decoding="async" />
+      <img src={pic('page')} alt="" aria-hidden="true" className="absolute max-w-none" decoding="async"
+        style={{ left: r.x, top: r.y, width: r.w, height: r.h, clipPath: `circle(${turn * reach}px at ${ox - r.x}px ${oy - r.y}px)`, visibility: turn > 0 ? 'visible' : 'hidden' }} />
+      <canvas ref={c} aria-label="Drawing surface on the Slate Pro screen" className="absolute cursor-crosshair touch-none mix-blend-multiply"
         style={{ ...box, borderRadius: Math.max(6, box.width * 0.018), pointerEvents: live ? 'auto' : 'none', opacity: live ? 1 : 0, transition: 'opacity .6s' }} />
-      <div className="pointer-events-none absolute grid place-items-center px-6 text-center text-[clamp(.85rem,1.4vw,1rem)] text-cream/70 transition-opacity duration-500 ease-brand"
-        style={{ ...box, opacity: live && !drawn ? 1 : 0 }}>Draw here with your finger, mouse or pen. Press harder for a heavier line.</div>
+      <div className="pointer-events-none absolute grid place-items-center px-6 text-center text-[clamp(.85rem,1.4vw,1rem)] transition-opacity duration-500 ease-brand"
+        style={{ ...box, opacity: live && !drawn ? 1 : 0, color: 'rgba(28,29,26,.55)' }}>Draw here with your finger, mouse or pen. Press harder for a heavier line.</div>
       <Readouts items={[['Quill', '4,096 levels'], ['Latency', '9 ms']]} />
       <div className="dock-bottom transition-opacity duration-500" style={{ opacity: live ? 1 : 0, pointerEvents: live ? 'auto' : 'none' }} aria-hidden={!live}>
         <div className="flex flex-wrap justify-center gap-2">

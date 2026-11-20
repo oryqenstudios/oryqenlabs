@@ -217,3 +217,12 @@ A first hero take (8 s, splash around the phone rather than filling the frame, r
 | `sound-grille.jpg` | Macro of the speaker grille | `01a1fa3d-905f-7a8f-aaac-c782c128448d` |
 | `camera-zoom-0..3.jpg` | The viewfinder's four lens photos: plantation, farmhouse, porch, basket | `01a1fa3b-5f87-7dfe-8c25-967b488c17d7` … |
 | `pair-crown-*.jpg`, `pair-zest-*.jpg`, `pair-slate-*.jpg` | Front-and-back product shots: Crown Pro and Zest composited from single studio stills; Slate Pro generated | see `zest-*`, `slate-*` in the log |
+
+## Fixes after review
+
+- `shot-09-underwater-v2.mp4`: starts on the lit screen at the surface (`water-start` still), turns over as it sinks, ends on `shot-09-end-frame.png`.
+- `shot-10-slate-edge-turn-v2.mp4`, `slate-front.jpg`, `slate-page.jpg`, `pair-slate-*.jpg`: Slate Pro with the camera module removed from the screen; the page still differs from the front only on the screen.
+- `shot-07-chip-dive-v2.mp4`, `chip-die.png`, `chip-<block>.jpg`: the dive ends on a photographed die; block macros are exact crops (`inputs/chip-*.jpg`), sharpened.
+- `shot-18-bass-drop-v2.mp4`: the droplets leap higher.
+
+Request IDs for all of these are in the session log as `water-v2`, `slate-edge-v2`, `chip-dive`, `sound-bass-v2`, `slate-*`, `chip-*`, `die`.
