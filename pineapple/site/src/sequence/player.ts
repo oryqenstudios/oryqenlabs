@@ -125,14 +125,25 @@ export class SequencePlayer {
       const u = this.url(s, 0);
       if (still.dataset.src !== u) { still.dataset.src = u; still.onload = () => this.draw(); still.src = u; }
       if (still.complete && still.naturalWidth) this.cover(still); else PAINT[0](g, w, h, 0.5, this.opts);
-    } else if (im) this.cover(im);
+    } else if (im) this.cover(im, s.fit);
     else { g.save(); PAINT[s.id](g, w, h, s.frames > 1 ? i / (s.frames - 1) : 0, this.opts); g.restore(); }
     this.onFrame?.({ shot: s, frame: i, real });
   }
   private still?: HTMLImageElement;
-  private cover(im: HTMLImageElement) {
-    const w = this.canvas.width, h = this.canvas.height, sc = Math.max(w / im.naturalWidth, h / im.naturalHeight);
-    const iw = im.naturalWidth * sc, ih = im.naturalHeight * sc;
-    this.g.drawImage(im, (w - iw) / 2, (h - ih) / 2, iw, ih);
+  private cover(im: HTMLImageElement, fit?: number) {
+    const { g } = this, w = this.canvas.width, h = this.canvas.height;
+    const coverSc = Math.max(w / im.naturalWidth, h / im.naturalHeight);
+    // tall screens: keep `fit` of the width in view rather than cropping a wide composition to its centre
+    const sc = fit ? Math.min(coverSc, w / (im.naturalWidth * fit)) : coverSc;
+    const iw = im.naturalWidth * sc, ih = im.naturalHeight * sc, x = (w - iw) / 2, y = (h - ih) / 2;
+    if (ih < h) { g.fillStyle = '#0a0b08'; g.fillRect(0, 0, w, h); }
+    g.drawImage(im, x, y, iw, ih);
+    if (ih < h) { // soften the top and bottom edges into the studio black
+      const e = Math.min(ih * 0.18, 90 * (window.devicePixelRatio || 1));
+      for (const [y0, y1] of [[y, y + e], [y + ih, y + ih - e]]) {
+        const gr = g.createLinearGradient(0, y0, 0, y1); gr.addColorStop(0, 'rgba(10,11,8,1)'); gr.addColorStop(1, 'rgba(10,11,8,0)');
+        g.fillStyle = gr; g.fillRect(0, Math.min(y0, y1), w, e);
+      }
+    }
   }
 }

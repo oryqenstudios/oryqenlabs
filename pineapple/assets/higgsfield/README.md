@@ -68,14 +68,16 @@ Still `s4-end` prompt:
 
 > Show this exact phone (first image) disassembled into its ten internal layers floating apart in one straight line along its depth axis, laid out like the second image: clear front glass, the display, the titanium frame, a dark green logic board with one square chip, a thin steel vapour chamber, a flat black battery, the camera module with its hexagonal plateau and lenses, small speakers and a haptic motor, a copper wireless-charging coil in a grey magnet ring, and the etched green-to-gold back glass. A soft glow of gold, green or amber light behind each layer. Three-quarter view. Keep the phone's design, finish, camera plateau and lenses exactly as in the reference image. Photoreal, matte black studio background unless stated, no text, no logos, no watermark.
 
-## Shot 05 · Exploded orbit
+## Shot 05 · Exploded orbit (take 2, live)
 
-`shot-05-exploded-orbit.mp4` · 1920×1080, 24 fps, 8 s · Kling 3.0 Pro image-to-video, sound off, cfg_scale 0.5. Request `01a1f9e7-91f8-754a-8bc0-7ca13142691f`.
-First frame: still `s4-end` (Qwen Image 3, request `01a1f9e0-65ad-7ed3-843d-be07d66107b8`). Last frame: still `s4-end` (Qwen Image 3, request `01a1f9e0-65ad-7ed3-843d-be07d66107b8`).
+`shot-05-exploded-orbit.mp4` · 1920×1080, 24 fps, 8 s · Kling 3.0 Pro image-to-video, first frame = still `s4-end` (the
+exploded view), no last frame so the camera is free to move; about half an orbit. Request `01a1f9f3-32dd-7a86-93cd-8790d52d52a8`.
 
 Prompt:
 
-> Photoreal product cinematography. Matte black studio void (#0A0B08). One large soft key light from the upper left, a thin warm rim light from behind on the right, controlled specular highlights, no lens flare. 100 mm macro lens look with shallow depth of field. No people, no hands, no on-screen text, no logos, no watermarks. 16:9. The ten layers of the exploded Crown Pro hang perfectly still in a straight line, each with its soft coloured glow behind it. The camera makes one smooth, constant-speed 360° orbit around the stack at eye level and returns exactly to the starting composition. Nothing moves except the camera. Avoid: Layers drifting or swapping order, glows flickering, speed changes, layers changing design on the far side.
+> Photoreal product cinematography. Matte black studio void (#0A0B08). One large soft key light from the upper left, a thin warm rim light from behind on the right, controlled specular highlights, no lens flare. 100 mm macro lens look with shallow depth of field. No people, no hands, no on-screen text, no logos, no watermarks. 16:9. The ten layers of the exploded Crown Pro hang perfectly still in a straight line, each with its soft coloured glow behind it. The camera orbits steadily around the floating stack at eye level, travelling a long way round it so the layers sweep past and are seen from the side and from behind, at a constant speed. Only the camera moves; the layers never drift, merge or change order. Avoid: layers drifting or swapping order, glows flickering, speed changes, layers changing design.
+
+Take 1 (`shot-05-exploded-orbit-take1.mp4`) used the same still as first and last frame; Kling held the stack almost still.
 
 ## Shot 06 · Lens fly-in
 
