@@ -17,7 +17,12 @@ Negative prompt:
 
 > Extra lenses, lenses outside the plateau, a round or square plateau, visible logos, text on the screen, reflections of a studio or a photographer.
 
-## Shot 01 · Juice drop (take 2, live)
+## Shot 01 · Juice drop (4K, live)
+
+`shot-01-juice-drop.mp4` · 3840×2160, 24 fps, 5 s · Kling 3.0 **4K** image-to-video (`kling-video/v3.0/4k/image-to-video`), same first/last frames and prompt as take 2 below. Request `01a1fa02-10c1-7481-9838-3ea1fcfeb295`. Ingested to 1440p frames.
+
+### Take 2 at 1080p (`shot-01-juice-drop-1080p.mp4`), kept for reference
+
 
 `shot-01-end-frame.png` · 2048×1152 · Qwen Image 3 edit of the master, seed 202: the drop lands squarely on the camera
 plateau, with a crown splash on the main lens. The edit also moves the camera in about 2×, which Kling plays as a push-in.
