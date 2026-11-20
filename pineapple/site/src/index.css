@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Design tokens. Layout idea: Apple-style long scroll; each beat is an intro screen (label,
+   two-line headline, one instruction) then a pinned full-bleed stage. Dark stages for cinema,
+   light bands for reading. --a1/--a2 are the Ripen accent and change at runtime with the finish. */
+:root {
+  --ink: #0a0b08; --ink-2: #13150f; --ink-3: #1c1f17; --ink-line: rgba(243, 241, 230, .13);
+  --paper: #eff1ea; --paper-2: #e2e5da; --paper-line: rgba(18, 20, 14, .14);
+  --cream: #f3f1e6; --char: #13140f; --mute-d: #9c9d8d; --mute-l: #5a5d50;
+  --a1: #6fa43f; --a2: #f0b53a;
+  --grad: linear-gradient(92deg, var(--a1), var(--a2));
+  --ease: cubic-bezier(.22, 1, .36, 1);
+  --gut-l: max(16px, env(safe-area-inset-left, 0px));
+  --gut-r: max(16px, env(safe-area-inset-right, 0px));
+  color-scheme: dark;
+}
+
+@layer base {
+  html.lenis, html.lenis body { height: auto; }
+  .lenis.lenis-smooth { scroll-behavior: auto !important; }
+  .lenis.lenis-stopped { overflow: hidden; }
+  body { @apply bg-ink text-cream font-sans antialiased; font-size: 16px; line-height: 1.5; overflow-x: hidden; }
+  body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 60; background: var(--ink); }
+  [hidden] { display: none !important; }
+  :focus-visible { outline: 2px solid var(--a2); outline-offset: 3px; border-radius: 6px; }
+  button { cursor: pointer; }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: .01ms !important; animation: none !important; } }
+}
+
+@layer components {
+  .wrap { @apply mx-auto max-w-page; padding-left: var(--gut-l); padding-right: var(--gut-r); }
+  .grad { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .label { @apply font-mono text-xs uppercase text-mute; letter-spacing: .14em; }
+  .light { @apply bg-paper text-char; color-scheme: light; }
+  .light .label { @apply text-mute-light; }
+
+  /* pinned stage */
+  .scrub { position: relative; }
+  .pin { position: sticky; top: 0; height: 100vh; height: 100dvh; overflow: hidden; background: var(--ink); }
+  /* Live 3D stages: the 3D canvas (z 20) sits between this stage's background pin and its UI pin,
+     so text, panels and the dock stay above the device and the depth-of-field blur reaches it. */
+  .pin-over { position: sticky; top: 0; height: 100vh; height: 100dvh; margin-top: -100vh; margin-top: -100dvh; z-index: 21; overflow: hidden; background: transparent; pointer-events: none; }
+  .pin-over > * { pointer-events: auto; }
+  .hud { position: absolute; left: var(--gut-l); right: var(--gut-r); bottom: max(18px, env(safe-area-inset-bottom, 0px)); display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; pointer-events: none; @apply font-mono uppercase text-mute; font-size: .68rem; letter-spacing: .1em; }
+  .hud .slot { border: 1px dashed rgba(243, 241, 230, .35); border-radius: 4px; padding: 2px 7px; color: var(--cream); }
+  .readouts { position: absolute; top: 84px; right: var(--gut-r); display: grid; gap: 10px; }
+  .card { background: rgba(19, 21, 15, .66); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--ink-line); border-radius: 12px; padding: 10px 14px; min-width: 150px; }
+  .card span { display: block; @apply font-mono uppercase text-mute; font-size: .64rem; letter-spacing: .14em; }
+  .card b { font-size: 1.5rem; font-weight: 650; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+
+  .chip { display: flex; align-items: center; gap: 7px; border: 1px solid var(--ink-line); background: rgba(19, 21, 15, .7); border-radius: 999px; padding: 6px 12px 6px 8px; font-size: .8rem; white-space: nowrap; transition: border-color .4s var(--ease), background .4s var(--ease); }
+  .chip i { width: 14px; height: 14px; border-radius: 50%; display: block; flex-shrink: 0; }
+  .chip[aria-pressed="true"] { border-color: var(--cream); background: rgba(243, 241, 230, .12); }
+  .light .chip { background: #fff; border-color: var(--paper-line); }
+  .light .chip[aria-pressed="true"] { border-color: var(--char); background: var(--paper-2); }
+  .dock-bottom { position: absolute; left: var(--gut-l); right: var(--gut-r); bottom: calc(max(18px, env(safe-area-inset-bottom, 0px)) + 30px); display: flex; justify-content: center; }
+
+  .pill { border: 1px solid var(--ink-line); background: rgba(19, 21, 15, .78); border-radius: 999px; padding: 7px 14px; font-size: .78rem; }
+  .pill.primary { background: var(--cream); color: var(--char); border-color: transparent; }
+  .seg { display: flex; background: rgba(19, 21, 15, .78); border: 1px solid var(--ink-line); border-radius: 999px; padding: 3px; }
+  .seg button { border-radius: 999px; padding: 6px 12px; font-size: .78rem; color: var(--mute-d); white-space: nowrap; transition: background .35s var(--ease), color .35s var(--ease); }
+  .seg button[aria-pressed="true"] { background: var(--cream); color: var(--char); }
+
+  @media (max-width: 760px) {
+    .readouts { top: 66px; left: var(--gut-l); display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+    .card { min-width: 0; padding: 7px 10px; }
+    .card b { font-size: 1.1rem; }
+    .dock-bottom { left: 0; right: 0; bottom: calc(max(18px, env(safe-area-inset-bottom, 0px)) + 50px); }
+    .dock-bottom > .chips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-left: var(--gut-l); padding-right: var(--gut-r); justify-content: flex-start; }
+    .dock-bottom > .chips::-webkit-scrollbar { display: none; }
+    .dock-bottom .chip { flex-shrink: 0; }
+  }
+}
+
+@layer components {
+  .logo-btn { background: none; border: 0; padding: 0; touch-action: manipulation; }
+  .logo-btn svg { transition: opacity .3s var(--ease); overflow: visible; }
+  .logo-btn.charging svg { animation: tremble .09s linear infinite; filter: drop-shadow(0 0 18px var(--a2)); }
+  .burst-hidden { opacity: 0; }
+  .burst-tint { position: fixed; inset: 0; z-index: 19; pointer-events: none; opacity: 0; mix-blend-mode: screen; }
+  @keyframes tremble { 0% { transform: translate(0, 0) rotate(0); } 25% { transform: translate(1px, -1px) rotate(-1deg); } 50% { transform: translate(-1px, 1px) rotate(1deg); } 75% { transform: translate(1px, 1px) rotate(0); } }
+}

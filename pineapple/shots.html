@@ -1,0 +1,251 @@
+<title>PINEAPPLE Shot Prompts</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a production sheet. One narrow reading column; each shot is a card with its numbers up top and the prompt in a quiet block below. */
+:root{
+  --bg:#f3f4ee; --surface:#ffffff; --sunk:#eceee6; --fg:#16170f; --mute:#5c5f52; --line:#d9dccf;
+  --a1:#5f9a37; --a2:#d99a1e; --code:#24261d;
+  --sans:"Inter",ui-sans-serif,system-ui,"Segoe UI",Roboto,Arial,sans-serif; --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d0e0a;--surface:#15170f;--sunk:#1b1d15;--fg:#efeee2;--mute:#9c9d8d;--line:#2a2d22;--a1:#86c25a;--a2:#f0b53a;--code:#e9e7da;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0d0e0a;--surface:#15170f;--sunk:#1b1d15;--fg:#efeee2;--mute:#9c9d8d;--line:#2a2d22;--a1:#86c25a;--a2:#f0b53a;--code:#e9e7da;color-scheme:dark}
+*{box-sizing:border-box}
+.wrap>*,.shots>*,.locks>*{min-width:0}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:860px;margin:0 auto;padding-block:56px 96px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:56px}
+.label{font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+h1{font-size:clamp(2.2rem,6vw,3.4rem);line-height:1.04;letter-spacing:-.035em;margin:10px 0 14px;text-wrap:balance}
+h1 span{background:linear-gradient(92deg,var(--a1),var(--a2));-webkit-background-clip:text;background-clip:text;color:transparent}
+h2{font-size:1.35rem;letter-spacing:-.02em;margin:0 0 16px}
+.lede{color:var(--mute);max-width:62ch;margin:0}
+ol.flow{margin:0;padding-left:1.3em;display:grid;gap:8px;max-width:68ch}
+ol.flow li::marker{font-family:var(--mono);color:var(--mute);font-size:.8em}
+.locks{display:grid;gap:14px}
+.lock{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;display:grid;gap:8px}
+.lock .top{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.lock h3{margin:0;font-size:1rem}
+.lock p{margin:0;font-size:.92rem;color:var(--fg)}
+table{width:100%;border-collapse:collapse;font-size:.9rem}
+th,td{text-align:left;padding:9px 10px 9px 0;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:600;white-space:nowrap}
+.shots{display:grid;gap:22px}
+.shot{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;display:grid;gap:14px;min-width:0}
+.shot header{display:grid;grid-template-columns:auto 1fr;gap:2px 14px;align-items:baseline}
+.shot .num{grid-row:span 2;font-family:var(--mono);font-size:1.6rem;font-weight:600;color:var(--a2);font-variant-numeric:tabular-nums}
+.shot h3{margin:0;font-size:1.2rem;letter-spacing:-.015em}
+.shot .used{color:var(--mute);font-size:.85rem}
+dl{margin:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 18px}
+dl .wide{grid-column:1/-1}
+dt{font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+dd{margin:2px 0 0;font-size:.9rem}
+code{font-family:var(--mono);font-size:.84em;background:var(--sunk);padding:1px 6px;border-radius:4px}
+.prompt{background:var(--sunk);border-radius:10px;padding:14px 16px}
+.prompt p{margin:0;font-size:.95rem;line-height:1.65}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.copy{font:inherit;font-size:.85rem;font-weight:600;border:0;border-radius:999px;padding:7px 14px;background:var(--fg);color:var(--bg);cursor:pointer}
+.copy.done{background:var(--a1)}
+.hint{color:var(--mute);font-size:.8rem}
+.avoid{margin:0;font-size:.88rem;color:var(--mute)}
+.avoid b{color:var(--fg);font-weight:600;margin-right:6px}
+.notes{margin:0;padding-left:1.1em;display:grid;gap:6px;font-size:.88rem}
+.pickers{display:flex;flex-wrap:wrap;gap:14px;font-size:.85rem;color:var(--mute)}
+select{font:inherit;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:4px 8px;margin-left:6px}
+pre{margin:0;background:var(--sunk);border-radius:10px;padding:14px 16px;overflow-x:auto;font-family:var(--mono);font-size:.8rem;line-height:1.6;color:var(--code)}
+:focus-visible{outline:2px solid var(--a2);outline-offset:2px}
+@media (max-width:600px){dl{grid-template-columns:1fr 1fr}.shot{padding:16px}}
+</style>
+<main class="wrap">
+  <header>
+    <p class="label">PINEAPPLE · Build plan §13</p>
+    <h1>Shot prompts, <span>0 to 10</span></h1>
+    <p class="lede">Prompts for every AI-generated frame sequence on the site. A full prompt is the style lock, the device lock, the shot prompt and its avoid line; the copy buttons put all four together. All product names and specs are placeholders.</p>
+  </header>
+  <section><h2>Workflow</h2><ol class="flow"><li>Make shot 0 first and lock one master image. Every video shot starts, and where possible ends, on a frame derived from it, so the camera plateau and the etched back cannot drift.</li><li>For each video shot, paste the full prompt (style lock, device lock, shot prompt and avoid line), upload the start frame, and upload the end frame if the tool accepts one.</li><li>If the tool takes only a start frame, generate three or four takes and keep the one whose last frame is closest to the planned end still.</li><li>Reject any take where the plateau shape, lens count or scale pattern changes. Small drift is very obvious when scrubbed frame by frame.</li><li>Check the tool’s native output resolution. Frames are planned at 2560 × 1440 (1440p); upscale before export if the tool outputs 1080p. 1440p versus 2160p is still an open decision.</li><li>Export each clip to frames with the command below, named so the prototype picks them up automatically: frames/shot-01/0001.webp and so on. Export a 4K still at each point where the scroll pauses.</li></ol></section>
+  <section><h2>Locks</h2><div class="locks">
+    <div class="lock"><div class="top"><h3>Style lock</h3><span class="label">Every shot</span></div><p>Photoreal product cinematography. Matte black studio void (#0A0B08). One large soft key light from the upper left, a thin warm rim light from behind on the right, controlled specular highlights, no lens flare. 100 mm macro lens look with shallow depth of field. No people, no hands, no on-screen text, no logos, no watermarks. 16:9.</p><div class="row"><button class="copy" data-lock="style" type="button">Copy</button></div></div><div class="lock"><div class="top"><h3>Crown Pro lock</h3><span class="label">Shots 0–9</span></div><p>The Crown Pro: a slim smartphone, 149.6 × 71.4 × 7.9 mm, flat sides and softly rounded corners. Brushed grade 5 titanium frame with a very fine diamond micro-texture like pineapple rind, crossed by four thin antenna lines. A leaf-blade-shaped Crown Key with a small tactile ridge on the right side; two volume keys on the left. Back: frosted, colour-infused glass, laser-etched with a shallow pattern of small rounded hexagonal scales laid out in interlocking spirals, 8 one way and 13 the other, like the eyes of a pineapple; barely visible head-on, glinting at an angle. Upper-left corner of the back: a raised camera plateau shaped like a single rounded-hexagon pineapple scale, 1.8 mm high, holding three lenses in a triangle (a large round main lens, a smaller round ultra-wide lens and a square periscope telephoto window), plus a small flash and a tiny depth sensor, all under sapphire covers.</p><div class="row"><button class="copy" data-lock="crown" type="button">Copy</button></div></div><div class="lock"><div class="top"><h3>Slate Pro lock</h3><span class="label">Shots 0 and 10</span></div><p>The Slate Pro: a 13-inch tablet, 281.6 × 215.5 × 5.1 mm, flat recycled-aluminium unibody with softly rounded corners and thin even screen borders. Back: anodised in a gradient that runs gold at the bottom to green at the top, laser-etched with the same small hexagonal pineapple-scale spiral pattern. A small scale-shaped camera plateau in one corner with a single lens and a depth sensor. The Quill stylus is slim and white, tapered like a crown leaf, flat on one side where it snaps magnetically to the long edge.</p><div class="row"><button class="copy" data-lock="slate" type="button">Copy</button></div></div>
+    <div class="lock"><div class="top"><h3>Finishes</h3><span class="label">Shot 0</span></div>
+      <div style="overflow-x:auto"><table><tbody><tr><th>Ripen</th><td>frosted back glass with a thin-film coating that reads leaf green straight on and shifts to warm gold at steep angles; champagne titanium frame</td></tr><tr><th>Rind</th><td>frosted back glass in deep olive-bronze; dark bronze titanium frame</td></tr><tr><th>Golden Flesh</th><td>frosted back glass in warm buttery yellow-gold; pale gold titanium frame</td></tr><tr><th>Crown Green</th><td>frosted back glass in deep leaf green; dark green-grey titanium frame</td></tr><tr><th>Core</th><td>frosted back glass in warm cream; light champagne titanium frame</td></tr></tbody></table></div></div>
+  </div></section>
+  <section><h2>Shots</h2><div class="shots">
+<article class="shot" id="shot-00">
+  <header><span class="num">00</span><h3>Master stills</h3><span class="used">Every shot below; finish picker (section 04)</span></header>
+  <dl>
+    <div><dt>Frames</dt><dd>4K stills</dd></div>
+    <div><dt>Clip</dt><dd>Image model, not video</dd></div>
+    <div><dt>Camera</dt><dd>Locked studio angles</dd></div>
+    <div class="wide"><dt>Start → end</dt><dd>Single images, no start or end frame</dd></div>
+    <div class="wide"><dt>Save to</dt><dd><code>frames/shot-00/</code></dd></div>
+  </dl>
+  <div class="pickers"><label>Finish <select data-fin="0"><option value="0">Ripen</option><option value="1">Rind</option><option value="2">Golden Flesh</option><option value="3">Crown Green</option><option value="4">Core</option></select></label><label>View <select data-view="0"><option value="0">three-quarter back (the master)</option><option value="1">back</option><option value="2">front</option></select></label></div>
+  <div class="prompt"><p data-text="0">Product hero still of the Crown Pro in the Ripen finish (frosted back glass with a thin-film coating that reads leaf green straight on and shifts to warm gold at steep angles; champagne titanium frame). Three-quarter back view: rotated 35° to the right and tilted 8° toward the camera, camera plateau nearest the lens. The phone stands upright, centred, filling about 70% of the frame height, on the black studio void. Crisp focus across the whole device.</p></div>
+  <div class="row"><button class="copy" data-copy="0" type="button">Copy full prompt</button><span class="hint">Includes the style lock, the Crown Pro lock and the avoid line.</span></div>
+  <p class="avoid"><b>Avoid</b> Extra lenses, lenses outside the plateau, a round or square plateau, visible logos, text on the screen, reflections of a studio or a photographer.</p>
+  <ul class="notes"><li>Generate the Ripen three-quarter back first. Pick one image and lock it: this is the master every video shot starts and ends from.</li><li>Make the other four finishes by editing the master (&quot;change only the colour of the back glass, plateau and frame to …&quot;), not by generating from scratch, so the camera plateau and scale pattern stay identical.</li><li>Upscale each still to 3840 × 2160. Save as frames/shot-00/ripen.webp, rind.webp, golden.webp, green.webp and core.webp; the prototype’s finish picker loads exactly these names.</li><li>Repeat for Slate Pro (Slate Pro lock) in Ripen, Rind and Core, front and back, saved as frames/shot-00/slate-ripen.webp and so on.</li></ul>
+</article>
+<article class="shot" id="shot-01">
+  <header><span class="num">01</span><h3>Juice drop</h3><span class="used">Hero (01)</span></header>
+  <dl>
+    <div><dt>Frames</dt><dd>120</dd></div>
+    <div><dt>Clip</dt><dd>5 s</dd></div>
+    <div><dt>Camera</dt><dd>Locked, very slow push-in</dd></div>
+    <div class="wide"><dt>Start → end</dt><dd>Master three-quarter back (Ripen) → Moment of impact (make this still first: edit the master to add a drop flattening on the plateau)</dd></div>
+    <div class="wide"><dt>Save to</dt><dd><code>frames/shot-01/</code></dd></div>
+  </dl>
+  
+  <div class="prompt"><p data-text="1">Locked camera with a very slow push-in. The Crown Pro stands upright in the Ripen finish, three-quarter back view, camera plateau nearest the lens. A single thick drop of golden pineapple juice forms at the top of the frame, stretches on a thin glossy thread, lets go, and falls in slow motion straight onto the top of the camera plateau. The juice is translucent amber-gold with internal caustics and a few suspended pulp fibres. End on the exact moment of contact: the drop flattening against the plateau, a thin crown of liquid just starting to lift. The phone does not move.</p></div>
+  <div class="row"><button class="copy" data-copy="1" type="button">Copy full prompt</button><span class="hint">Includes the style lock, the Crown Pro lock and the avoid line.</span></div>
+  <p class="avoid"><b>Avoid</b> Splashes before impact, liquid on the lenses before contact, the phone tilting or turning, camera shake, extra lenses, any change to the plateau shape.</p>
+  <ul class="notes"><li>The rising sugar counter (0 → 14.2 °Bx) is HTML on top of these frames. Leave the upper-right of the frame clear.</li></ul>
+</article>
+<article class="shot" id="shot-02">
+  <header><span class="num">02</span><h3>Colour eruption</h3><span class="used">Hero (01)</span></header>
+  <dl>
+    <div><dt>Frames</dt><dd>150</dd></div>
+    <div><dt>Clip</dt><dd>6 s</dd></div>
+    <div><dt>Camera</dt><dd>Locked, then a slow 10° rise</dd></div>
+    <div class="wide"><dt>Start → end</dt><dd>Last frame of shot 1 → Peak of the splash (generate this still first and reuse it as the start of shot 3)</dd></div>
+    <div class="wide"><dt>Save to</dt><dd><code>frames/shot-02/</code></dd></div>
+  </dl>
+  
+  <div class="prompt"><p data-text="2">Continuous from the moment the drop hits the camera plateau. The impact throws a high-speed eruption of thick, glossy liquid in five colours: deep olive-bronze, warm yellow-gold, leaf green, warm cream, and a green-to-gold gradient. Ribbons, crowns and droplets rise up and around the phone in a loose spiral. Each colour stays a separate, clean stream and never muddies into the others. The camera holds still for the first second, then rises slowly by about 10°. End at the peak: the liquid at its highest point, every droplet sharp and suspended, the phone clean apart from the plateau.</p></div>
+  <div class="row"><button class="copy" data-copy="2" type="button">Copy full prompt</button><span class="hint">Includes the style lock, the Crown Pro lock and the avoid line.</span></div>
+  <p class="avoid"><b>Avoid</b> Brown or muddy colour mixing, liquid covering the phone, motion blur smearing the droplets, the phone moving, confetti or paint-powder look.</p>
+  <ul class="notes"><li>These five colours are the finish palette; the logo burst on the page reuses them.</li></ul>
+</article>
+<article class="shot" id="shot-03">
+  <header><span class="num">03</span><h3>Frozen orbit</h3><span class="used">Frozen (02), with “Recolour the burst”</span></header>
+  <dl>
+    <div><dt>Frames</dt><dd>180 (2° per frame)</dd></div>
+    <div><dt>Clip</dt><dd>7.5 s</dd></div>
+    <div><dt>Camera</dt><dd>360° orbit at eye level, constant speed</dd></div>
+    <div class="wide"><dt>Start → end</dt><dd>Peak-of-splash still (end of shot 2) → The same frame, so it loops</dd></div>
+    <div class="wide"><dt>Save to</dt><dd><code>frames/shot-03/</code></dd></div>
+  </dl>
+  
+  <div class="prompt"><p data-text="3">Time is completely frozen at the peak of the splash: every droplet, ribbon and crown of coloured liquid hangs motionless in the air around the Crown Pro. The camera makes one smooth, constant-speed 360° orbit at eye level around the phone and the splash, and finishes exactly where it started. Nothing moves except the camera. Reflections slide naturally across the titanium frame and the frosted back glass, and the etched scale pattern glints as the angle changes.</p></div>
+  <div class="row"><button class="copy" data-copy="3" type="button">Copy full prompt</button><span class="hint">Includes the style lock, the Crown Pro lock and the avoid line.</span></div>
+  <p class="avoid"><b>Avoid</b> Liquid moving or dripping, the phone spinning instead of the camera, speed changes or easing, the splash changing shape on the far side, a different phone appearing from behind.</p>
+  <ul class="notes"><li>Most tools cannot hold a full 360° in one generation. Make it as two 180° halves: first create a still of the same frozen scene seen from directly behind (image edit), then use it as the end frame of half one and the start frame of half two.</li><li>“Recolour the burst” applies a hue/saturation/greyscale filter to these frames, which also tints the phone. If that shows, render a second pass with the splash removed and composite the untinted phone on top.</li></ul>
+</article>
+<article class="shot" id="shot-04">
+  <header><span class="num">04</span><h3>Exploded view</h3><span class="used">Inside (05), cinematic intro</span></header>
+  <dl>
+    <div><dt>Frames</dt><dd>150</dd></div>
+    <div><dt>Clip</dt><dd>6 s</dd></div>
+    <div><dt>Camera</dt><dd>Three-quarter view, slow rise</dd></div>
+    <div class="wide"><dt>Start → end</dt><dd>Assembled master (three-quarter) → Fully exploded still</dd></div>
+    <div class="wide"><dt>Save to</dt><dd><code>frames/shot-04/</code></dd></div>
+  </dl>
+  
+  <div class="prompt"><p data-text="4">Three-quarter view of the Crown Pro, camera rising slowly. The phone separates layer by layer along its depth axis into ten evenly spaced layers, the outer layers first and the inner layers last. From front to back: clear front glass; the display panel, screen on with concentric gold and green rings; the titanium frame; a dark green double-stacked logic board with one square chip; a thin stainless-steel vapour chamber; a flat black battery cell; the camera system with its scale-shaped plateau, three lenses and a folded periscope module; two small speakers, a haptic motor and the USB-C port; a copper wireless-charging coil inside a grey magnet ring; and the etched back glass. As each layer separates, a soft bloom of coloured light opens behind it, each in its own shade of gold, green or amber. End fully exploded, all ten layers floating in one straight line.</p></div>
+  <div class="row"><button class="copy" data-copy="4" type="button">Copy full prompt</button><span class="hint">Includes the style lock, the Crown Pro lock and the avoid line.</span></div>
+  <p class="avoid"><b>Avoid</b> Layers flying off in different directions, extra or missing layers, parts merging, screws scattering, liquid, labels or text.</p>
+  <ul class="notes"><li>For the end frame, screenshot the live 3D model in section 05 with Explode at 100% and use it as the composition guide in an image-to-image edit of the master. The real layer order is then guaranteed.</li></ul>
+</article>
+<article class="shot" id="shot-05">
+  <header><span class="num">05</span><h3>Exploded orbit</h3><span class="used">Inside (05), cinematic intro</span></header>
+  <dl>
+    <div><dt>Frames</dt><dd>180 (2° per frame)</dd></div>
+    <div><dt>Clip</dt><dd>7.5 s</dd></div>
+    <div><dt>Camera</dt><dd>360° orbit, constant speed</dd></div>
+    <div class="wide"><dt>Start → end</dt><dd>Last frame of shot 4 → The same frame, so it loops</dd></div>
+    <div class="wide"><dt>Save to</dt><dd><code>frames/shot-05/</code></dd></div>
+  </dl>
+  
+  <div class="prompt"><p data-text="5">The ten layers of the exploded Crown Pro hang perfectly still in a straight line, each with its soft coloured glow behind it. The camera makes one smooth, constant-speed 360° orbit around the stack at eye level and returns exactly to the starting composition. Nothing moves except the camera.</p></div>
+  <div class="row"><button class="copy" data-copy="5" type="button">Copy full prompt</button><span class="hint">Includes the style lock, the Crown Pro lock and the avoid line.</span></div>
+  <p class="avoid"><b>Avoid</b> Layers drifting or swapping order, glows flickering, speed changes, layers changing design on the far side.</p>
+  <ul class="notes"><li>Use the same two-halves method as shot 3. The “Orbit 342°” and “Layers 10/10” readouts are HTML.</li></ul>
+</article>
+<article class="shot" id="shot-06">
+  <header><span class="num">06</span><h3>Lens fly-in</h3><span class="used">Camera (06); “Look closer” on the camera layer</span></header>
+  <dl>
+    <div><dt>Frames</dt><dd>150</dd></div>
+    <div><dt>Clip</dt><dd>6 s</dd></div>
+    <div><dt>Camera</dt><dd>Push-in along the lens axis</dd></div>
+    <div class="wide"><dt>Start → end</dt><dd>Camera module close-up (crop and upscale from the master, then edit to macro) → Glowing sensor still</dd></div>
+    <div class="wide"><dt>Save to</dt><dd><code>frames/shot-06/</code></dd></div>
+  </dl>
+  
+  <div class="prompt"><p data-text="6">Extreme macro. Start on the scale-shaped camera plateau of the Crown Pro, centred on the square periscope telephoto window. The camera pushes straight in along the lens axis, through the sapphire cover and into the dark lens barrel. Inside, a 45° glass prism is revealed. A beam of warm white light enters through the window, strikes the prism and folds 90° sideways, travels through a row of five precise lens elements, and lands on an image sensor that lights up green-gold. End on the glowing sensor, edge to edge.</p></div>
+  <div class="row"><button class="copy" data-copy="6" type="button">Copy full prompt</button><span class="hint">Includes the style lock, the Crown Pro lock and the avoid line.</span></div>
+  <p class="avoid"><b>Avoid</b> Fantasy circuitry, glitch effects, the beam bending more than once, lens flares, text.</p>
+  <ul class="notes"><li>The 0.5×–25× zoom slider is HTML over the last frame; leave the lower third calm.</li></ul>
+</article>
+<article class="shot" id="shot-07">
+  <header><span class="num">07</span><h3>Chip dive</h3><span class="used">Chip (07); “Look closer” on the logic board</span></header>
+  <dl>
+    <div><dt>Frames</dt><dd>150</dd></div>
+    <div><dt>Clip</dt><dd>6 s</dd></div>
+    <div><dt>Camera</dt><dd>Top-down descent</dd></div>
+    <div class="wide"><dt>Start → end</dt><dd>Logic board, top-down (crop from the exploded still) → Glowing die still</dd></div>
+    <div class="wide"><dt>Save to</dt><dd><code>frames/shot-07/</code></dd></div>
+  </dl>
+  
+  <div class="prompt"><p data-text="7">Top-down descent onto a dark green double-stacked logic board. The camera drops toward a square chip package with a plain brushed-metal lid, passes through the lid, and reveals the silicon die beneath. As the view settles on the die, its regions light up in sequence: two large performance cores in gold, four efficiency cores in green, six graphics clusters in pale blue, then a grid of 32 small neural-engine cores in amber. Fine, realistic silicon detail glowing from within. End on the fully lit die.</p></div>
+  <div class="row"><button class="copy" data-copy="7" type="button">Copy full prompt</button><span class="hint">Includes the style lock, the Crown Pro lock and the avoid line.</span></div>
+  <p class="avoid"><b>Avoid</b> Sci-fi city-of-lights clichés, holograms, random glyphs, any text on the chip.</p>
+  <ul class="notes"><li>Keep the lid blank: video models garble lettering. “NECTAR N7 PRO” and the counting core numbers are HTML.</li></ul>
+</article>
+<article class="shot" id="shot-08">
+  <header><span class="num">08</span><h3>Etched glass sweep</h3><span class="used">Design (03); “Look closer” on the back glass</span></header>
+  <dl>
+    <div><dt>Frames</dt><dd>120</dd></div>
+    <div><dt>Clip</dt><dd>5 s</dd></div>
+    <div><dt>Camera</dt><dd>Locked macro; only the light moves</dd></div>
+    <div class="wide"><dt>Start → end</dt><dd>Back glass in shadow → Back glass fully lit</dd></div>
+    <div class="wide"><dt>Save to</dt><dd><code>frames/shot-08/</code></dd></div>
+  </dl>
+  
+  <div class="prompt"><p data-text="8">Locked macro shot of the frosted back glass of the Crown Pro in the Ripen finish, filling the frame. Only the light moves. A narrow, low raking light sweeps slowly from left to right across the glass. Where it passes, it reveals a shallow laser-etched pattern of small rounded hexagonal scales arranged in interlocking spirals, 8 turning one way and 13 the other, like the eyes of a pineapple. The etching is very fine, almost invisible head-on, glinting only where the light grazes it. The thin-film coating shifts from leaf green to warm gold as the light angle changes. End with the whole back softly lit and the pattern visible across it.</p></div>
+  <div class="row"><button class="copy" data-copy="8" type="button">Copy full prompt</button><span class="hint">Includes the style lock, the Crown Pro lock and the avoid line.</span></div>
+  <p class="avoid"><b>Avoid</b> Camera movement, deep or embossed bumps, the pattern changing between frames, scratches, fingerprints, logos.</p>
+  
+</article>
+<article class="shot" id="shot-09">
+  <header><span class="num">09</span><h3>Underwater</h3><span class="used">Durability (08)</span></header>
+  <dl>
+    <div><dt>Frames</dt><dd>150</dd></div>
+    <div><dt>Clip</dt><dd>6 s</dd></div>
+    <div><dt>Camera</dt><dd>Follows the phone down</dd></div>
+    <div class="wide"><dt>Start → end</dt><dd>Phone just above a calm, clear water surface → Phone resting at depth</dd></div>
+    <div class="wide"><dt>Save to</dt><dd><code>frames/shot-09/</code></dd></div>
+  </dl>
+  
+  <div class="prompt"><p data-text="9">The Crown Pro, screen on with a calm wallpaper of concentric gold and green rings, drops through the surface of clear, deep-blue water, trailing fine silver bubbles. The camera follows it down. Rippling caustic light from the surface slides across the titanium frame and the glass. The phone sinks slowly, turning a little so its lit screen faces the camera, and comes to rest on smooth pale sand. The screen stays on throughout. End with the phone resting at depth, a few bubbles still rising.</p></div>
+  <div class="row"><button class="copy" data-copy="9" type="button">Copy full prompt</button><span class="hint">Includes the style lock, the Crown Pro lock and the avoid line.</span></div>
+  <p class="avoid"><b>Avoid</b> Cracks, water inside the phone, the screen switching off, murky water, fish, divers, text.</p>
+  <ul class="notes"><li>The depth (6 m), time (30 min) and IP68 readouts are HTML and count up with scroll.</li></ul>
+</article>
+<article class="shot" id="shot-10">
+  <header><span class="num">10</span><h3>Slate Pro edge turn</h3><span class="used">Slate Pro (09); “Look closer” on the Quill strip and back panel</span></header>
+  <dl>
+    <div><dt>Frames</dt><dd>150</dd></div>
+    <div><dt>Clip</dt><dd>6 s</dd></div>
+    <div><dt>Camera</dt><dd>Slow orbit to a side view</dd></div>
+    <div class="wide"><dt>Start → end</dt><dd>Master tablet front → Edge-on with the Quill touching the glass</dd></div>
+    <div class="wide"><dt>Save to</dt><dd><code>frames/shot-10/</code></dd></div>
+  </dl>
+  
+  <div class="prompt"><p data-text="10">Start face-on to the Slate Pro, screen on with concentric gold and green rings. The camera orbits slowly to the side until the tablet is exactly edge-on, its 5.1 mm profile a thin bright line of aluminium. Then the Quill enters from the upper right and its fine tip touches the glass; a soft ring of light ripples out from the point of contact. End edge-on with the Quill tip touching the screen.</p></div>
+  <div class="row"><button class="copy" data-copy="10" type="button">Copy full prompt</button><span class="hint">Includes the style lock, the Slate Pro lock and the avoid line.</span></div>
+  <p class="avoid"><b>Avoid</b> The tablet bending or warping, a keyboard appearing, hands, the stylus looking like a pencil or a pen with a clip.</p>
+  <ul class="notes"><li>After this shot the page hands over to live HTML: visitors draw on the screen with the Quill.</li></ul>
+</article></div></section>
+  <section><h2>Export to frames</h2><pre># frames ÷ clip seconds = fps (e.g. 120 frames from a 5 s clip → fps=24)
+mkdir -p frames/shot-01
+ffmpeg -i shot-01.mp4 -vf &quot;fps=120/5,scale=2560:1440:flags=lanczos&quot; -c:v libwebp -quality 82 frames/shot-01/%04d.webp</pre><p class="lede" style="margin-top:12px">For AVIF, export PNG frames the same way and convert them with avifenc. The prototype loads .webp from these folders and falls back to its placeholder when a frame is missing.</p></section>
+</main>
+<script>
+const D={"LOCKS":{"style":{"title":"Style lock","use":"Every shot","text":"Photoreal product cinematography. Matte black studio void (#0A0B08). One large soft key light from the upper left, a thin warm rim light from behind on the right, controlled specular highlights, no lens flare. 100 mm macro lens look with shallow depth of field. No people, no hands, no on-screen text, no logos, no watermarks. 16:9."},"crown":{"title":"Crown Pro lock","use":"Shots 0–9","text":"The Crown Pro: a slim smartphone, 149.6 × 71.4 × 7.9 mm, flat sides and softly rounded corners. Brushed grade 5 titanium frame with a very fine diamond micro-texture like pineapple rind, crossed by four thin antenna lines. A leaf-blade-shaped Crown Key with a small tactile ridge on the right side; two volume keys on the left. Back: frosted, colour-infused glass, laser-etched with a shallow pattern of small rounded hexagonal scales laid out in interlocking spirals, 8 one way and 13 the other, like the eyes of a pineapple; barely visible head-on, glinting at an angle. Upper-left corner of the back: a raised camera plateau shaped like a single rounded-hexagon pineapple scale, 1.8 mm high, holding three lenses in a triangle (a large round main lens, a smaller round ultra-wide lens and a square periscope telephoto window), plus a small flash and a tiny depth sensor, all under sapphire covers."},"slate":{"title":"Slate Pro lock","use":"Shots 0 and 10","text":"The Slate Pro: a 13-inch tablet, 281.6 × 215.5 × 5.1 mm, flat recycled-aluminium unibody with softly rounded corners and thin even screen borders. Back: anodised in a gradient that runs gold at the bottom to green at the top, laser-etched with the same small hexagonal pineapple-scale spiral pattern. A small scale-shaped camera plateau in one corner with a single lens and a depth sensor. The Quill stylus is slim and white, tapered like a crown leaf, flat on one side where it snaps magnetically to the long edge."}},"FINISHES":[["ripen","Ripen","frosted back glass with a thin-film coating that reads leaf green straight on and shifts to warm gold at steep angles; champagne titanium frame"],["rind","Rind","frosted back glass in deep olive-bronze; dark bronze titanium frame"],["golden","Golden Flesh","frosted back glass in warm buttery yellow-gold; pale gold titanium frame"],["green","Crown Green","frosted back glass in deep leaf green; dark green-grey titanium frame"],["core","Core","frosted back glass in warm cream; light champagne titanium frame"]],"SHOTS":[{"id":0,"device":"crown","prompt":"Product hero still of the Crown Pro in the {FINISH} finish ({FINISH_DESC}). {VIEW} The phone stands upright, centred, filling about 70% of the frame height, on the black studio void. Crisp focus across the whole device.","avoid":"Extra lenses, lenses outside the plateau, a round or square plateau, visible logos, text on the screen, reflections of a studio or a photographer.","views":[["three-quarter back (the master)","Three-quarter back view: rotated 35° to the right and tilted 8° toward the camera, camera plateau nearest the lens."],["back","Straight-on back view."],["front","Straight-on front view, screen on, showing a wallpaper of concentric gold and green rings like a sliced pineapple, with no text or clock."]]},{"id":1,"device":"crown","prompt":"Locked camera with a very slow push-in. The Crown Pro stands upright in the Ripen finish, three-quarter back view, camera plateau nearest the lens. A single thick drop of golden pineapple juice forms at the top of the frame, stretches on a thin glossy thread, lets go, and falls in slow motion straight onto the top of the camera plateau. The juice is translucent amber-gold with internal caustics and a few suspended pulp fibres. End on the exact moment of contact: the drop flattening against the plateau, a thin crown of liquid just starting to lift. The phone does not move.","avoid":"Splashes before impact, liquid on the lenses before contact, the phone tilting or turning, camera shake, extra lenses, any change to the plateau shape.","views":null},{"id":2,"device":"crown","prompt":"Continuous from the moment the drop hits the camera plateau. The impact throws a high-speed eruption of thick, glossy liquid in five colours: deep olive-bronze, warm yellow-gold, leaf green, warm cream, and a green-to-gold gradient. Ribbons, crowns and droplets rise up and around the phone in a loose spiral. Each colour stays a separate, clean stream and never muddies into the others. The camera holds still for the first second, then rises slowly by about 10°. End at the peak: the liquid at its highest point, every droplet sharp and suspended, the phone clean apart from the plateau.","avoid":"Brown or muddy colour mixing, liquid covering the phone, motion blur smearing the droplets, the phone moving, confetti or paint-powder look.","views":null},{"id":3,"device":"crown","prompt":"Time is completely frozen at the peak of the splash: every droplet, ribbon and crown of coloured liquid hangs motionless in the air around the Crown Pro. The camera makes one smooth, constant-speed 360° orbit at eye level around the phone and the splash, and finishes exactly where it started. Nothing moves except the camera. Reflections slide naturally across the titanium frame and the frosted back glass, and the etched scale pattern glints as the angle changes.","avoid":"Liquid moving or dripping, the phone spinning instead of the camera, speed changes or easing, the splash changing shape on the far side, a different phone appearing from behind.","views":null},{"id":4,"device":"crown","prompt":"Three-quarter view of the Crown Pro, camera rising slowly. The phone separates layer by layer along its depth axis into ten evenly spaced layers, the outer layers first and the inner layers last. From front to back: clear front glass; the display panel, screen on with concentric gold and green rings; the titanium frame; a dark green double-stacked logic board with one square chip; a thin stainless-steel vapour chamber; a flat black battery cell; the camera system with its scale-shaped plateau, three lenses and a folded periscope module; two small speakers, a haptic motor and the USB-C port; a copper wireless-charging coil inside a grey magnet ring; and the etched back glass. As each layer separates, a soft bloom of coloured light opens behind it, each in its own shade of gold, green or amber. End fully exploded, all ten layers floating in one straight line.","avoid":"Layers flying off in different directions, extra or missing layers, parts merging, screws scattering, liquid, labels or text.","views":null},{"id":5,"device":"crown","prompt":"The ten layers of the exploded Crown Pro hang perfectly still in a straight line, each with its soft coloured glow behind it. The camera makes one smooth, constant-speed 360° orbit around the stack at eye level and returns exactly to the starting composition. Nothing moves except the camera.","avoid":"Layers drifting or swapping order, glows flickering, speed changes, layers changing design on the far side.","views":null},{"id":6,"device":"crown","prompt":"Extreme macro. Start on the scale-shaped camera plateau of the Crown Pro, centred on the square periscope telephoto window. The camera pushes straight in along the lens axis, through the sapphire cover and into the dark lens barrel. Inside, a 45° glass prism is revealed. A beam of warm white light enters through the window, strikes the prism and folds 90° sideways, travels through a row of five precise lens elements, and lands on an image sensor that lights up green-gold. End on the glowing sensor, edge to edge.","avoid":"Fantasy circuitry, glitch effects, the beam bending more than once, lens flares, text.","views":null},{"id":7,"device":"crown","prompt":"Top-down descent onto a dark green double-stacked logic board. The camera drops toward a square chip package with a plain brushed-metal lid, passes through the lid, and reveals the silicon die beneath. As the view settles on the die, its regions light up in sequence: two large performance cores in gold, four efficiency cores in green, six graphics clusters in pale blue, then a grid of 32 small neural-engine cores in amber. Fine, realistic silicon detail glowing from within. End on the fully lit die.","avoid":"Sci-fi city-of-lights clichés, holograms, random glyphs, any text on the chip.","views":null},{"id":8,"device":"crown","prompt":"Locked macro shot of the frosted back glass of the Crown Pro in the Ripen finish, filling the frame. Only the light moves. A narrow, low raking light sweeps slowly from left to right across the glass. Where it passes, it reveals a shallow laser-etched pattern of small rounded hexagonal scales arranged in interlocking spirals, 8 turning one way and 13 the other, like the eyes of a pineapple. The etching is very fine, almost invisible head-on, glinting only where the light grazes it. The thin-film coating shifts from leaf green to warm gold as the light angle changes. End with the whole back softly lit and the pattern visible across it.","avoid":"Camera movement, deep or embossed bumps, the pattern changing between frames, scratches, fingerprints, logos.","views":null},{"id":9,"device":"crown","prompt":"The Crown Pro, screen on with a calm wallpaper of concentric gold and green rings, drops through the surface of clear, deep-blue water, trailing fine silver bubbles. The camera follows it down. Rippling caustic light from the surface slides across the titanium frame and the glass. The phone sinks slowly, turning a little so its lit screen faces the camera, and comes to rest on smooth pale sand. The screen stays on throughout. End with the phone resting at depth, a few bubbles still rising.","avoid":"Cracks, water inside the phone, the screen switching off, murky water, fish, divers, text.","views":null},{"id":10,"device":"slate","prompt":"Start face-on to the Slate Pro, screen on with concentric gold and green rings. The camera orbits slowly to the side until the tablet is exactly edge-on, its 5.1 mm profile a thin bright line of aluminium. Then the Quill enters from the upper right and its fine tip touches the glass; a soft ring of light ripples out from the point of contact. End edge-on with the Quill tip touching the screen.","avoid":"The tablet bending or warping, a keyboard appearing, hands, the stylus looking like a pencil or a pen with a clip.","views":null}]};
+const pick={};
+function text(s){const f=D.FINISHES[pick['f'+s.id]||0];const v=s.views?s.views[pick['v'+s.id]||0]:null;let t=s.prompt.replace('{FINISH}',f[1]).replace('{FINISH_DESC}',f[2]);if(v)t=t.replace('{VIEW}',v[1]);return t;}
+function full(s){return[D.LOCKS.style.text,D.LOCKS[s.device].text,text(s),'Avoid: '+s.avoid].join('\n\n');}
+async function copy(btn,str){try{await navigator.clipboard.writeText(str);btn.textContent='Copied';btn.classList.add('done');setTimeout(()=>{btn.textContent=btn.dataset.lock?'Copy':'Copy full prompt';btn.classList.remove('done');},1600);}
+  catch(e){const p=btn.closest('.shot,.lock').querySelector('p');const r=document.createRange();r.selectNodeContents(p);const sel=getSelection();sel.removeAllRanges();sel.addRange(r);btn.textContent='Selected · press Ctrl+C';}}
+document.addEventListener('click',e=>{const b=e.target.closest('.copy');if(!b)return;if(b.dataset.lock)copy(b,D.LOCKS[b.dataset.lock].text);else copy(b,full(D.SHOTS.find(s=>s.id==b.dataset.copy)));});
+document.addEventListener('change',e=>{const t=e.target;const id=t.dataset.fin??t.dataset.view;if(id==null)return;pick[(t.dataset.fin!=null?'f':'v')+id]=+t.value;const s=D.SHOTS.find(x=>x.id==id);document.querySelector('[data-text="'+id+'"]').textContent=text(s);});
+</script>

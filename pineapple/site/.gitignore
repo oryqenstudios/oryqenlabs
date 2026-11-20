@@ -1,0 +1,7 @@
+node_modules
+dist
+*.log
+.DS_Store
+# generated frames are large; keep them out of git (host them on the CDN) unless the team decides otherwise
+public/frames/shot-*/
+public/frames/mobile/
