@@ -33,7 +33,12 @@ Prompt:
 Take 1 (`*-take1.*`): same set-up with an earlier end frame where the drop landed on the top edge beside the plateau.
 Kept for reference.
 
-## Shot 02 · Colour eruption
+## Shot 02 · Colour eruption (4K, live)
+
+`shot-02-colour-eruption.mp4` · 3840×2160, 24 fps, 6 s · Kling 3.0 **4K** image-to-video (`kling-video/v3.0/4k/image-to-video`), same first/last frames and prompt as the 1080p take below. Request `01a1f9ff-79a6-79d3-84ba-3327173ef5f1`. Sharper liquid and droplets; ingested to 1440p frames.
+
+1080p take (`shot-02-colour-eruption-1080p.mp4`), kept for reference:
+
 
 `shot-02-colour-eruption.mp4` · 1920×1080, 24 fps, 6 s · Kling 3.0 Pro image-to-video, sound off, cfg_scale 0.5. Request `01a1f9e2-eec5-7604-9e3c-b989b72d3dfa`.
 First frame: the shot 01 end frame. Last frame: still `s2-end` (Qwen Image 3, request `01a1f9e0-6539-746d-9370-e0a13119eced`).
