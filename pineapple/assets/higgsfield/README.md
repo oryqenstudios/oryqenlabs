@@ -93,3 +93,59 @@ Still `s6-start` prompt:
 Still `s6-end` prompt:
 
 > Inside a smartphone periscope camera, extreme macro: a beam of warm white light enters, strikes a 45-degree glass prism and folds 90 degrees sideways through a row of five precise lens elements onto a small image sensor that glows warm green-gold. Dark interior, glints on glass and metal, cinematic, shallow depth of field. Photoreal product photography, matte black studio void, one large soft key light from the upper left, a thin warm rim light from behind on the right, 16:9, no text, no logos, no watermark.
+
+## Shot 07 · Chip dive
+
+`shot-07-chip-dive.mp4` · 1920×1080, 24 fps, 6 s · Kling 3.0 Pro image-to-video, sound off, cfg_scale 0.5. Request `01a1f9e7-e15a-786a-b7e1-4975cd6fe81d`.
+First frame: still `s7-start` (Qwen Image 3, request `01a1f9e0-66eb-73ae-b870-21181c0413d0`). Last frame: still `s7-end` (Qwen Image 3, request `01a1f9e0-b16a-77d2-8ecb-1d3c701c7be7`).
+
+Prompt:
+
+> Photoreal product cinematography. Matte black studio void (#0A0B08). One large soft key light from the upper left, a thin warm rim light from behind on the right, controlled specular highlights, no lens flare. 100 mm macro lens look with shallow depth of field. No people, no hands, no on-screen text, no logos, no watermarks. 16:9. Top-down descent onto a dark green double-stacked logic board. The camera drops toward a square chip package with a plain brushed-metal lid, passes through the lid, and reveals the silicon die beneath. As the view settles on the die, its regions light up in sequence: two large performance cores in gold, four efficiency cores in green, six graphics clusters in pale blue, then a grid of 32 small neural-engine cores in amber. Fine, realistic silicon detail glowing from within. End on the fully lit die. Avoid: Sci-fi city-of-lights clichés, holograms, random glyphs, any text on the chip.
+
+Still `s7-start` prompt:
+
+> Top-down macro photograph of a dark green double-stacked smartphone logic board with a single square chip package with a plain brushed-metal lid in the centre, tiny components and gold contacts around it, no markings or text on any part. Photoreal product photography, matte black studio void, one large soft key light from the upper left, a thin warm rim light from behind on the right, 16:9, no text, no logos, no watermark.
+
+Still `s7-end` prompt:
+
+> Extreme top-down macro of a bare silicon chip die glowing from within: two large performance cores glowing gold, four efficiency cores glowing green, six graphics clusters glowing pale blue, and a grid of 32 small neural-engine cores glowing amber, with fine realistic silicon circuitry between them. No text. Photoreal product photography, matte black studio void, one large soft key light from the upper left, a thin warm rim light from behind on the right, 16:9, no text, no logos, no watermark.
+
+## Shot 08 · Etched glass sweep
+
+`shot-08-etched-glass-sweep.mp4` · 1920×1080, 24 fps, 5 s · Kling 3.0 Pro image-to-video, sound off, cfg_scale 0.5. Request `01a1f9eb-8d7c-73af-bd7e-4254d048c8d9`.
+First frame: still `s8-start` (Qwen Image 3, request `01a1f9e0-b46f-784d-ae84-5a100b98c241`). Last frame: none (prompt-driven).
+
+Prompt:
+
+> Photoreal product cinematography. Matte black studio void (#0A0B08). One large soft key light from the upper left, a thin warm rim light from behind on the right, controlled specular highlights, no lens flare. 100 mm macro lens look with shallow depth of field. No people, no hands, no on-screen text, no logos, no watermarks. 16:9. Locked macro shot of the frosted back glass of the Crown Pro in the Ripen finish, filling the frame. Only the light moves. A narrow, low raking light sweeps slowly from left to right across the glass. Where it passes, it reveals a shallow laser-etched pattern of small rounded hexagonal scales arranged in interlocking spirals, 8 turning one way and 13 the other, like the eyes of a pineapple. The etching is very fine, almost invisible head-on, glinting only where the light grazes it. The thin-film coating shifts from leaf green to warm gold as the light angle changes. End with the whole back softly lit and the pattern visible across it. Avoid: Camera movement, deep or embossed bumps, the pattern changing between frames, scratches, fingerprints, logos.
+
+Still `s8-start` prompt:
+
+> Extreme close-up of the frosted back glass of this phone filling the whole frame, showing a shallow laser-etched pattern of small rounded scales in interlocking spirals; the scene is almost dark, with only a faint narrow raking light at the far left edge so the pattern is barely visible. Same green-to-gold finish. Keep the phone's design, finish, camera plateau and lenses exactly as in the reference image. Photoreal, matte black studio background unless stated, no text, no logos, no watermark.
+
+## Shot 09 · Underwater
+
+`shot-09-underwater.mp4` · 1920×1080, 24 fps, 6 s · Kling 3.0 Pro image-to-video, sound off, cfg_scale 0.5. Request `01a1f9eb-8c4b-7fc2-a774-9d27aa20613d`.
+First frame: still `s9-start` (Qwen Image 3, request `01a1f9e0-da51-7417-8fa8-0b0804c65e70`). Last frame: still `s9-end` (Qwen Image 3, request `01a1f9e0-dcdf-7074-aee2-3edd636f0690`).
+
+Prompt:
+
+> Photoreal product cinematography. Matte black studio void (#0A0B08). One large soft key light from the upper left, a thin warm rim light from behind on the right, controlled specular highlights, no lens flare. 100 mm macro lens look with shallow depth of field. No people, no hands, no on-screen text, no logos, no watermarks. 16:9. The Crown Pro drops through the surface of clear, deep-blue water, trailing fine silver bubbles. The camera follows it down. Rippling caustic light from the surface slides across the titanium frame and the glass. The phone sinks slowly with its etched back toward the camera and comes to rest on smooth pale sand. End with the phone resting at depth, a few bubbles still rising. Avoid: Cracks, water inside the phone, the screen switching off, murky water, fish, divers, text.
+
+Still `s9-start` prompt:
+
+> This exact phone, back facing the camera, falling into clear deep-blue water, just breaking the surface, trailing fine silver bubbles, with rippling caustic light across its titanium frame and frosted back; underwater view looking slightly up toward the bright surface. Keep the phone's design, finish, camera plateau and lenses exactly as in the reference image. Photoreal, no text, no logos, no watermark.
+
+Still `s9-end` prompt:
+
+> This exact phone, back facing up, resting on smooth pale sand at the bottom of clear deep-blue water six metres down, a few small bubbles rising, soft caustic light patterns rippling across the phone and the sand. Keep the phone's design, finish, camera plateau and lenses exactly as in the reference image. Photoreal, no text, no logos, no watermark.
+
+## Shot 10 · Slate Pro edge turn
+
+`shot-10-slate-pro-edge-turn.mp4` · 1920×1080, 24 fps, 6 s · Kling 3.0 Pro image-to-video, sound off, cfg_scale 0.5. Request `01a1f9ec-30e7-706d-abe7-801b402d7b35`.
+First frame: still `s10-master` (Qwen Image 3, request `01a1f9e1-2c39-7682-9250-ff4787da7d20`). Last frame: none (prompt-driven).
+
+Prompt:
+
+> Photoreal product cinematography. Matte black studio void (#0A0B08). One large soft key light from the upper left, a thin warm rim light from behind on the right, controlled specular highlights, no lens flare. 100 mm macro lens look with shallow depth of field. No people, no hands, no on-screen text, no logos, no watermarks. 16:9. Start face-on to the Slate Pro, screen on with concentric gold and green rings. The camera orbits slowly to the side until the tablet is exactly edge-on, its 5.1 mm profile a thin bright line of aluminium. Then the Quill enters from the upper right and its fine tip touches the glass; a soft ring of light ripples out from the point of contact. End edge-on with the Quill tip touching the screen. Avoid: The tablet bending or warping, a keyboard appearing, hands, the stylus looking like a pencil or a pen with a clip.
