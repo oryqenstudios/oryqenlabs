@@ -92,6 +92,7 @@ export function buildPhone(): DeviceModel {
   const screen = photoTexture('screen');
   const boardTex = photoTexture('board'), batteryTex = photoTexture('battery'), coolTex = photoTexture('cooling');
   const smallTex = photoTexture('small'), coilTex = photoTexture('coil');
+  const frameTex = photoTexture('frame'), camTex = photoTexture('camera');
   const photo = (map: THREE.Texture, extra: Partial<THREE.MeshStandardMaterialParameters> = {}) => std({ map, color: 0xffffff, transparent: true, alphaTest: 0.4, roughness: 0.5, ...extra });
 
   // brushed titanium: anisotropic sheen along the rails, rind micro-texture as bump
@@ -113,6 +114,7 @@ export function buildPhone(): DeviceModel {
   layer(2, 0, (add, L) => {
     const s = rr(W, H, R); s.holes.push(rr(W - 0.34, H - 0.34, R - 0.17));
     add(ext(s, D, 0.04, 4), frameMat);
+    add(new THREE.PlaneGeometry(W, H), photo(frameTex, { metalness: 0.6, roughness: 0.3 })).position.z = D / 2 + 0.05; // the photographed titanium band
     const dark = std({ color: 0x1c1d1a, roughness: 0.6 });
     for (const sx of [-1, 1]) for (const sy of [-1, 1]) add(new THREE.BoxGeometry(0.4, 0.05, D + 0.03), dark).position.set(sx * (W / 2 - 0.17), sy * 5.9, 0);
     const keyG = new THREE.Group(); keyG.position.set(W / 2 + 0.05, 1.3, 0); L.group.add(keyG); keyG.name = 'crown-key';
@@ -161,6 +163,8 @@ export function buildPhone(): DeviceModel {
     add(new THREE.BoxGeometry(0.8, 2.4, 0.55), body).position.set(CX + 0.62, CY - 1.1, 0.3); // folded-prism module
     const fl = add(new THREE.CircleGeometry(0.12, 24), std({ color: 0xfff2c8, emissive: 0x5a4a20, roughness: 0.3 })); fl.rotation.y = Math.PI; fl.position.set(CX + 0.62, CY + 0.85, -0.1);
     const tof = add(new THREE.CircleGeometry(0.1, 24), std({ color: 0x050505, roughness: 0.2 })); tof.rotation.y = Math.PI; tof.position.set(CX + 0.62, CY - 0.95, -0.1);
+    // the photographed plateau and lenses, facing out of the back
+    const cam = add(new THREE.PlaneGeometry(3.6 * 0.815, 3.6), photo(camTex, { roughness: 0.25, metalness: 0.4 })); cam.rotation.y = Math.PI; cam.position.set(CX, CY - 0.1, -0.26);
   });
   // 8 small parts: the earpiece and mics, and the photographed bottom row (speakers, haptic motor, mics, USB-C)
   layer(7, -0.1, add => {
@@ -229,6 +233,8 @@ export function buildTablet(): DeviceModel {
   // photographed parts: the board (turned to lie along the tablet) and the battery cells
   const tBoard = photoTexture('board'); tBoard.center.set(0.5, 0.5); tBoard.rotation = Math.PI / 2;
   const tCell = photoTexture('battery'), spkTex = photoTexture('speaker');
+  const tcamTex = photoTexture('tcam'), stripTex = photoTexture('strip'), quillTex = photoTexture('../slate/quill'), kbdTex = photoTexture('kbd');
+  const tPhoto = (map: THREE.Texture, extra: Partial<THREE.MeshStandardMaterialParameters> = {}) => std({ map, color: 0xffffff, transparent: true, alphaTest: 0.4, roughness: 0.45, ...extra });
 
   const backMat = phys({ color: 0xffffff, map: ripenTex, bumpMap: bumpTex, bumpScale: 0.8, roughness: 0.4, metalness: 0.25, clearcoat: 0.4 });
   const sideMat = std({ color: 0xb6a065, metalness: 0.9, roughness: 0.32 });
@@ -249,6 +255,7 @@ export function buildTablet(): DeviceModel {
     const ring = add(cyl(0.55, 0.14), std({ color: 0xb9b5a6, metalness: 1, roughness: 0.25 })); ring.position.set(CX, CY + 0.3, -0.13); L.focus = ring;
     const gl = add(new THREE.CircleGeometry(0.47, 40), phys({ color: 0x07080b, roughness: 0.04, clearcoat: 1 })); gl.rotation.y = Math.PI; gl.position.set(CX, CY + 0.3, -0.205);
     const tof = add(new THREE.CircleGeometry(0.14, 24), std({ color: 0x050505 })); tof.rotation.y = Math.PI; tof.position.set(CX, CY - 0.65, -0.1);
+    const cam = add(new THREE.PlaneGeometry(2.2 * 1.15, 2.2), tPhoto(tcamTex, { metalness: 0.4 })); cam.rotation.y = Math.PI; cam.position.set(CX, CY, -0.24);
     add(new THREE.SphereGeometry(0.22, 24, 16), phys({ color: 0x07080b, roughness: 0.05, clearcoat: 1 })).position.set(W / 2 - 0.55, 0, 0.2); // front camera, landscape edge
   });
   layer(4, -0.05, add => {
@@ -257,15 +264,20 @@ export function buildTablet(): DeviceModel {
   layer(5, 0, add => { const spk = std({ color: 0x26282a, roughness: 0.7 }); for (const sx of [-1, 1]) for (const sy of [-1, 1]) { add(new THREE.BoxGeometry(2.6, 1.1, 0.3), spk).position.set(sx * (W / 2 - 2), sy * (H / 2 - 1.1), 0); add(new THREE.PlaneGeometry(2.5, 1.06), std({ map: spkTex, color: 0xffffff, roughness: 0.6, metalness: 0.3 })).position.set(sx * (W / 2 - 2), sy * (H / 2 - 1.1), 0.155); } });
   layer(6, 0, (add, L) => {
     add(new THREE.BoxGeometry(0.35, 12, 0.16), std({ color: 0x55585c, metalness: 0.85, roughness: 0.35 })).position.set(W / 2 - 0.35, 0, 0);
+    add(new THREE.PlaneGeometry(0.4, 12), tPhoto(stripTex, { metalness: 0.5 })).position.set(W / 2 - 0.35, 0, 0.09);
     const q = new THREE.Group(); q.position.set(W / 2 + 0.75, 0, 0); L.group.add(q); q.name = 'quill'; L.focus = q;
     const white = phys({ color: 0xf1ede2, roughness: 0.35, clearcoat: 0.6 });
     add(new THREE.CylinderGeometry(0.3, 0.3, 15, 40), white, q);
     const tip = add(new THREE.ConeGeometry(0.3, 1.6, 40), white, q); tip.position.y = -8.3; tip.rotation.x = Math.PI;
     const nib = add(new THREE.ConeGeometry(0.08, 0.4, 16), std({ color: 0x9c9d8d }), q); nib.position.y = -9.25; nib.rotation.x = Math.PI;
+    // the real Quill, photographed: it replaces the modelled pen
+    q.children.forEach(c => { c.visible = false; });
+    const pen = add(new THREE.PlaneGeometry(17 * 0.0684, 17), tPhoto(quillTex, { side: THREE.DoubleSide, roughness: 0.35 }), q); pen.position.y = -1;
   });
   layer(7, 0, add => {
     const gold = std({ color: 0xd6b46a, metalness: 1, roughness: 0.2 });
     for (const y of [-1, 0, 1]) { const c = add(cyl(0.2, 0.2, 24), gold); c.rotation.y = Math.PI / 2; c.position.set(-W / 2 + 0.3, y * 0.8, 0); }
+    add(new THREE.PlaneGeometry(2.4 * 1.422, 2.4), tPhoto(kbdTex, { metalness: 0.5 })).position.set(-W / 2 + 0.3, 0, 0.22); // the photographed connector
     add(new THREE.BoxGeometry(0.3, 4, 0.14), std({ color: 0x55585c, metalness: 0.85, roughness: 0.35 })).position.set(-W / 2 + 0.6, 0, 0);
   });
   layer(8, -0.24, add => {
