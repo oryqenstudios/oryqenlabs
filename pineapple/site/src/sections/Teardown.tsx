@@ -105,7 +105,7 @@ export function Teardown({ source, copy = TEARDOWN_COPY }: { source?: ExploreSou
   const L = sel >= 0 ? layers[sel] : null;
 
   return (
-    <section id={copy.id} aria-label={`${copy.title} ${copy.accent}`} className="relative py-[clamp(48px,8vh,96px)]">
+    <section id={copy.id} aria-label={`${copy.title} ${copy.accent}`} className="relative overflow-x-clip py-[clamp(48px,8vh,96px)]">
       <div className="wrap grid gap-5">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="grid gap-2">
@@ -121,7 +121,7 @@ export function Teardown({ source, copy = TEARDOWN_COPY }: { source?: ExploreSou
         </div>
 
         <div className="relative grid gap-5">
-          <div ref={stage} className="relative left-1/2 h-[100svh] w-screen -translate-x-1/2 overflow-hidden bg-[#050403]"
+          <div ref={stage} className="relative ml-[calc(50%-50vw)] h-[100svh] w-screen overflow-hidden bg-[#050403]"
             onPointerMove={e => { if (e.pointerType === 'mouse' || e.buttons) steerTo(e.clientY); }} style={{ touchAction: arrivedNow ? 'pan-x' : undefined }}>
             {/* laid out at the zoomed size (not scaled), so the photos are drawn sharp at every zoom */}
             <div className="absolute" style={{ left: tx, top: ty, width: size.w * s, height: size.h * s }}>
