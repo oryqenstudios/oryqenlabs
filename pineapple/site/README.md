@@ -11,6 +11,22 @@ npm run preview    # serve dist/
 
 ## Deployment
 
+### Vercel
+
+`vercel.json` holds the build (Vite, `npm run build`, output `dist`) and the cache headers: hashed `assets/` are cached
+for a year, frame images for a day (they keep their names when re-rendered), and `index.html` and
+`frames/manifest.json` always revalidate.
+
+One-time setup on vercel.com: **Add New → Project → Import** the `oryqenstudios/oryqenlabs` repository (allow the Vercel
+GitHub app access to it), set **Root Directory** to `pineapple/site`, and deploy. `pineapple-site` is the repository's
+default branch, so it is the production branch; other branches get preview deployments. Deploy through the Git import,
+not the CLI: the site is about 680 MB and the CLI's upload cap is far below that.
+
+Domain: in the project, **Settings → Domains → Add** `pineappleconcept.com` (and `www`), then replace the GitHub Pages
+DNS records below with the records Vercel shows. Once it serves from Vercel, turn off the Pages workflow.
+
+### GitHub Pages
+
 Every push to `pineapple-site` (or `main`) that touches `pineapple/site/` builds the site and publishes it to GitHub Pages
 (`.github/workflows/pineapple-pages.yml`). `public/CNAME` sets the custom domain, pineappleconcept.com.
 
