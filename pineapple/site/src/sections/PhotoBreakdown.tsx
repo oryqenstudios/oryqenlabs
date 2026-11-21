@@ -8,7 +8,8 @@ const BASE = import.meta.env.BASE_URL;
 /**
  * The hands-on breakdown, photographed. Every layer of the exploded photo is its own cut-out, laid exactly where it
  * sits in the photo: drag any layer out (it lifts, casts a shadow and follows your hand), let go and it glides back.
- * Click a layer to read its specs.
+ * Click a layer to read its specs. The cut-outs are rectangles with see-through corners that overlap, so what you grab
+ * is decided by each layer's own pixels (a small alpha mask per layer), never by its rectangle.
  */
 export function PhotoBreakdown() {
   const layers = DEVICES.phone.layers, parts = TEARDOWN.phone!.parts;
@@ -19,6 +20,35 @@ export function PhotoBreakdown() {
   const [hover, setHover] = useState(-1);
   const [sel, setSel] = useState(-1);
   const start = useRef({ x: 0, y: 0 });
+  const masks = useRef<({ w: number; h: number; a: Uint8ClampedArray } | undefined)[]>([]);
+
+  useEffect(() => {
+    let live = true;
+    layers.forEach((l, i) => {
+      const im = new Image(); im.src = `${BASE}frames/breakdown/${l.id}.webp`;
+      im.decode().then(() => {
+        if (!live) return;
+        const w = 160, h = Math.max(1, Math.round((w * im.naturalHeight) / im.naturalWidth)), c = document.createElement('canvas');
+        c.width = w; c.height = h; const x = c.getContext('2d', { willReadFrequently: true }); if (!x) return;
+        x.drawImage(im, 0, 0, w, h); masks.current[i] = { w, h, a: x.getImageData(0, 0, w, h).data };
+      }).catch(() => {});
+    });
+    return () => { live = false; };
+  }, [layers]);
+
+  /** The topmost layer with solid pixels under the pointer, or -1. */
+  const hit = (cx: number, cy: number) => {
+    const r = stage.current!.getBoundingClientRect(), px = cx - r.left, py = cy - r.top;
+    const order = layers.map((_, i) => i).sort((a, b) => (b === sel ? 1 : 0) - (a === sel ? 1 : 0) || a - b); // same order as zIndex
+    for (const i of order) {
+      const q = parts[layers[i].id]?.rect; if (!q) continue;
+      const u = (px - box.x - q[0] * box.w) / ((q[2] - q[0]) * box.w), v = (py - box.y - q[1] * box.h) / ((q[3] - q[1]) * box.h);
+      if (u < 0 || u >= 1 || v < 0 || v >= 1) continue;
+      const m = masks.current[i]; if (!m) return i; // mask not in yet: the rectangle will do
+      if (m.a[(Math.floor(v * m.h) * m.w + Math.floor(u * m.w)) * 4 + 3] > 48) return i;
+    }
+    return -1;
+  };
 
   useEffect(() => {
     const el = stage.current!;
@@ -33,13 +63,14 @@ export function PhotoBreakdown() {
     addEventListener('keydown', k); return () => removeEventListener('keydown', k);
   }, []);
 
-  const down = (i: number) => (e: React.PointerEvent) => {
-    (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
+  const down = (e: React.PointerEvent) => {
+    const i = hit(e.clientX, e.clientY); if (i < 0) return;
+    (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
     start.current = { x: e.clientX, y: e.clientY };
     setDrag({ i, dx: 0, dy: 0, moved: false }); setBack(-1);
   };
   const move = (e: React.PointerEvent) => {
-    if (!drag) return;
+    if (!drag) { const i = hit(e.clientX, e.clientY); if (i !== hover) setHover(i); return; }
     const dx = e.clientX - start.current.x, dy = e.clientY - start.current.y;
     setDrag({ ...drag, dx, dy, moved: drag.moved || Math.hypot(dx, dy) > 6 });
   };
@@ -57,7 +88,8 @@ export function PhotoBreakdown() {
         <h2 className="m-0 text-[clamp(2rem,4.6vw,3.6rem)] font-bold leading-[.98] tracking-[-.04em]">Pull it apart <span className="grad">yourself.</span></h2>
         <p className="m-0 max-w-[560px] text-mute">Every layer is a real photograph. Drag any layer out; let go and it glides home. Click a layer to read it.</p>
       </div>
-      <div ref={stage} className="relative h-[100svh] w-full touch-none select-none bg-[#050505]" onPointerMove={move} onPointerUp={up} onPointerCancel={up}>
+      <div ref={stage} className="relative h-[100svh] w-full touch-none select-none bg-[#050505]" onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up}
+        onPointerLeave={() => { if (!drag) setHover(-1); }} style={{ cursor: drag?.moved ? 'grabbing' : hover >= 0 ? 'grab' : undefined }}>
         <div aria-hidden="true" className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(60% 45% at 50% 70%, rgba(240,181,58,.07), transparent 70%)' }} />
         {layers.map((l, i) => {
           const r = parts[l.id]?.rect; if (!r) return null;
@@ -65,8 +97,7 @@ export function PhotoBreakdown() {
           const t = held ? `translate(${drag!.dx}px, ${drag!.dy}px) scale(${1 + 0.05 * lift})` : `translateY(${-6 * lift}px) scale(${1 + 0.05 * lift})`;
           return (
             <img key={l.id} src={`${BASE}frames/breakdown/${l.id}.webp`} alt={l.name} draggable={false} decoding="async"
-              onPointerDown={down(i)} onPointerEnter={() => setHover(i)} onPointerLeave={() => setHover(h => (h === i ? -1 : h))}
-              className="absolute max-w-none cursor-grab active:cursor-grabbing"
+              className="pointer-events-none absolute max-w-none"
               style={{
                 left: box.x + r[0] * box.w, top: box.y + r[1] * box.h, width: (r[2] - r[0]) * box.w, height: (r[3] - r[1]) * box.h,
                 zIndex: held ? 40 : sel === i ? 30 : 20 - i, transform: t,
