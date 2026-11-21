@@ -2,7 +2,10 @@
 
 ## Summary reel (under a minute)
 
-The current cut is `pineapple-summary-reel.mp4` (54.9 s, 1080×1920, 30 fps, H.264, no audio).
+The current cut is `pineapple-summary-reel.mp4` (54.9 s, 1080×1920, 30 fps, H.264, no audio). Without the template (just
+the website, the cursor and the transitions): `pineapple-website-reel-16x9.mp4` (1920×1080) and
+`pineapple-website-reel-vertical.mp4` (the site centred on black, 1080×1920), both 50.7 s, made with
+`python3 summary.py /tmp/hl out.mp4 --plain` (add `--vertical` for the tall one).
 
 Ten highlights of the live site, each showing its interaction, cut together for a 1080×1920, 30 fps reel. The whole
 desktop page is in frame: every clip is recorded at 1920×1080 and laid full width across the reel over a blurred copy of

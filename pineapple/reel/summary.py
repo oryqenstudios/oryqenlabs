@@ -1,11 +1,14 @@
 """Summary reel, step 2: the highlight clips, full width in a 1080x1920 frame over a blurred copy of themselves, with kinetic
-captions, a title and end card, and zoom-through / whip-pan / light-sweep transitions. python3 summary.py <clips dir> <out.mp4>"""
+captions, a title and end card, and zoom-through / whip-pan / light-sweep transitions. python3 summary.py <clips dir> <out.mp4>
+--plain: just the website, no template (no cards, captions, progress or blurred fill), 1920x1080; add --vertical for the
+site centred on black in 1080x1920."""
 import json, math, os, sys, subprocess
 from multiprocessing import Pool
 import numpy as np
 from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageChops
-SRC, OUT = sys.argv[1], sys.argv[2]; TMP = SRC.rstrip('/') + '-summary'; os.makedirs(TMP, exist_ok=True)
-W, H, T = 1080, 1920, 12; FD = '/usr/share/fonts/opentype/inter/'
+SRC, OUT = sys.argv[1], sys.argv[2]; PLAIN, VERT = '--plain' in sys.argv, '--vertical' in sys.argv
+TMP = SRC.rstrip('/') + '-summary' + ('-plain' + ('v' if VERT else '') if PLAIN else ''); os.makedirs(TMP, exist_ok=True)
+W, H, T = (1920, 1080, 12) if PLAIN and not VERT else (1080, 1920, 12); FD = '/usr/share/fonts/opentype/inter/'
 F = lambda n, s: ImageFont.truetype(FD + n, s)
 GOLD, CREAM, MUTE = (240, 181, 58), (243, 241, 230), (156, 157, 141)
 clips = json.load(open(f'{SRC}/clips.json'))
@@ -14,7 +17,7 @@ DETAILS = ['4K splash footage · one continuous scroll', 'A beam of light reveal
            'Real photographed layers · drag any one out', 'Drag the slider · ultra-wide to 25× zoom', 'Macro-photographed board · tap a part for specs',
            'Scroll inside the speaker · watch the bass move', 'IP68 · 6 m for 30 minutes', 'Lift the Quill · draw on the screen', 'Three models · every finish, photographed']
 ease = lambda t: 1 - (1 - max(0, min(1, t))) ** 3
-FG_W, FG_H = W, round(W * 9 / 16); FG_Y = (H - FG_H) // 2 + 60
+FG_W, FG_H = W, round(W * 9 / 16); FG_Y = (H - FG_H) // 2 + (0 if PLAIN else 60)
 def vignette():
     v = Image.new('L', (W, H), 0); ImageDraw.Draw(v).ellipse((-300, -200, W + 300, H + 200), fill=255)
     return v.filter(ImageFilter.GaussianBlur(220))
@@ -32,6 +35,10 @@ def words_layer(text, font, a_list, color):
 def clip_frame(job):
     ci, i, n, path, label, caption = job
     src = Image.open(path).convert('RGB')
+    if PLAIN:  # the website and nothing else
+        if VERT: im = Image.new('RGB', (W, H), (5, 5, 5)); im.paste(src.resize((FG_W, FG_H), Image.LANCZOS), (0, FG_Y))
+        else: im = src if src.size == (W, H) else src.resize((W, H), Image.LANCZOS)
+        im.save(f'{TMP}/c{ci:02d}_{i:05d}.jpg', quality=95); return f'{TMP}/c{ci:02d}_{i:05d}.jpg'
     bg = src.resize((int(H * src.width / src.height / 4), H // 4), Image.BILINEAR).filter(ImageFilter.GaussianBlur(14))
     bg = bg.resize((int(H * src.width / src.height), H), Image.BILINEAR); x0 = (bg.width - W) // 2; bg = bg.crop((x0, 0, x0 + W, H))
     im = Image.blend(Image.new('RGB', (W, H), (5, 5, 5)), bg, 0.42)
@@ -92,11 +99,11 @@ def transition(job):
     im.save(out, quality=94); return out
 if __name__ == '__main__':
     with Pool(os.cpu_count()) as p:
-        segs = [p.map(card, [('intro', i, 66) for i in range(66)])]
+        segs = [] if PLAIN else [p.map(card, [('intro', i, 66) for i in range(66)])]
         for ci, c in enumerate(clips):
             fs = sorted(x for x in os.listdir(c['dir']) if x.endswith('.jpg')); n = len(fs)
             segs.append(p.map(clip_frame, [(ci, i, n, f"{c['dir']}/{f}", c['label'], c['caption']) for i, f in enumerate(fs)], chunksize=8))
-        segs.append(p.map(card, [('outro', i, 84) for i in range(84)]))
+        if not PLAIN: segs.append(p.map(card, [('outro', i, 84) for i in range(84)]))
         seq, jobs = [], []
         for k, s in enumerate(segs):
             body = s[T if k else 0: len(s) - (T if k < len(segs) - 1 else 0)]; seq += body
@@ -106,6 +113,6 @@ if __name__ == '__main__':
         p.map(transition, jobs)
     with open(f'{TMP}/list.txt', 'w') as fl:
         for f in seq: fl.write(f"file '{f}'\nduration {1/30:.6f}\n")
-    subprocess.run(['ffmpeg', '-hide_banner', '-loglevel', 'error', '-y', '-f', 'concat', '-safe', '0', '-i', f'{TMP}/list.txt', '-r', '30', '-c:v', 'libx264', '-preset', 'slow',
+    subprocess.run(['ffmpeg', '-hide_banner', '-loglevel', 'error', '-y', '-f', 'concat', '-safe', '0', '-i', f'{TMP}/list.txt', *(['-vf', f'fade=t=in:d=0.3,fade=t=out:st={len(seq) / 30 - 0.6:.2f}:d=0.6'] if PLAIN else []), '-r', '30', '-c:v', 'libx264', '-preset', 'slow',
                     '-crf', '16', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', OUT], check=True)
     print('summary', OUT, round(len(seq) / 30, 1), 's')
