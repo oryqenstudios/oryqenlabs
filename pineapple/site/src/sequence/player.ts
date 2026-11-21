@@ -24,6 +24,8 @@ export function loadManifest(): Promise<Manifest> {
 }
 
 const MAX_CONCURRENT = 10;
+/** ?reel: footage always fills the frame (for recording vertical reels). */
+const REEL = typeof location !== 'undefined' && new URLSearchParams(location.search).has('reel');
 const FADE_MS = 520;
 export interface HudInfo { shot: Shot; frame: number; real: boolean }
 
@@ -234,7 +236,7 @@ export class SequencePlayer {
   private cover(im: HTMLImageElement, fit?: number, fitH?: number) {
     const { g } = this, w = this.canvas.width, h = this.canvas.height;
     // tall screens keep `fit` of the width, wide screens `fitH` of the height, instead of cropping the subject
-    const { x, y, w: iw, h: ih } = coverRect(w, h, im.naturalWidth, im.naturalHeight, fit, fitH);
+    const { x, y, w: iw, h: ih } = coverRect(w, h, im.naturalWidth, im.naturalHeight, REEL ? undefined : fit, REEL ? undefined : fitH);
     g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
     if (ih < h - 1 || iw < w - 1) { g.fillStyle = '#050505'; g.fillRect(0, 0, w, h); }
     g.drawImage(im, x, y, iw, ih);
