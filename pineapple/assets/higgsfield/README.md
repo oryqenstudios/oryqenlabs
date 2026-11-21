@@ -246,3 +246,4 @@ Request IDs: `speaker-dive`, `speaker-bass`, `speaker-cutaway` in the session lo
 - `chip-board.png` / `chip-board-4k.jpg`: the logic board macro (chip in a steel retention frame), sharpened to 4096 px in quarters; `chip-board-<part>.jpg` close-ups; `4k-board-dive.mp4`: the 4K move from the board into the processor (shot 7). Request IDs `board*` in the session log.
 
 Second 4K batch: `4k-turn-*` (finish turntables), `4k-water-v2`, `4k-slate-edge-v2`, `4k-sound-bass-v2`, `4k-speaker-dive`, `4k-speaker-bass-v2`, `4k-shot8`. Every footage scene on the site is now sourced from 4K.
+- `chip-board-<part>.jpg` re-made from the 4K board (`inputs/board4-*.jpg`) for sharper, cleaner close-ups.

@@ -6,6 +6,7 @@ import { pad, sm } from '../lib/math';
 
 const BASE = import.meta.env.BASE_URL;
 const IN_MS = 1500, OUT_MS = 1100;
+const FEATHER_EDGES = 'linear-gradient(to right, transparent, #000 9%, #000 91%, transparent), linear-gradient(to bottom, transparent, #000 9%, #000 91%, transparent)';
 /** A camera move: slow to start, glides, settles. */
 const glide = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 /** Devices whose breakdown has been photographed. */
@@ -36,7 +37,7 @@ export function Teardown({ source, copy = TEARDOWN_COPY }: { source?: ExploreSou
   const steer = useRef(0); // until this time the pointer steers the pan instead of the drift
 
   useEffect(() => {
-    const el = stage.current!; const ro = new ResizeObserver(() => { const W = el.clientWidth, H = el.clientHeight, w = Math.max(W, (H * 16) / 9), h = (w * 9) / 16; setSize({ w, h, ox: (W - w) / 2, oy: (H - h) / 2 }); });
+    const el = stage.current!; const ro = new ResizeObserver(() => { const W = el.clientWidth, H = el.clientHeight, w = Math.min(W, (H * 16) / 9), h = (w * 9) / 16; /* the whole photo in view, so parts at its edges stay reachable */ setSize({ w, h, ox: (W - w) / 2, oy: (H - h) / 2 }); });
     ro.observe(el); return () => ro.disconnect();
   }, []);
   useEffect(() => () => cancelAnimationFrame(raf.current), []);
@@ -94,12 +95,18 @@ export function Teardown({ source, copy = TEARDOWN_COPY }: { source?: ExploreSou
   let s = 1, cx = 0.5, cy = 0.5;
   if (part) {
     const [x0, y0, x1, y1] = part.rect, g = qRef.current;
-    const sT = Math.min(0.92 / (x1 - x0), 1 / (0.6 * (y1 - y0)));
+    // fit the part to ~80% of the visible stage, and never zoom past what its close-up photo can resolve
+    const vw = size.w + 2 * size.ox, vh = size.h + 2 * size.oy;
+    const sT = Math.min(4.5, (0.8 * vw) / ((x1 - x0) * size.w), (0.8 * vh) / ((y1 - y0) * size.h));
     const seen = Math.min(1, 1 / (sT * (y1 - y0))); // share of the part's height in view
     const cyT = y0 + (y1 - y0) * (seen >= 1 ? 0.5 : seen / 2 + (1 - seen) * pan);
     s = Math.exp(Math.log(sT) * g); cx = 0.5 + ((x0 + x1) / 2 - 0.5) * g; cy = 0.5 + (cyT - 0.5) * g;
   }
-  const tx = size.ox + size.w * 0.5 - s * cx * size.w, ty = size.oy + size.h * 0.5 - s * cy * size.h;
+  const stW = size.w + 2 * size.ox, stH = size.h + 2 * size.oy, pw = size.w * s, ph = size.h * s;
+  let tx = size.ox + size.w * 0.5 - s * cx * size.w, ty = size.oy + size.h * 0.5 - s * cy * size.h;
+  // once zoomed past the stage, never pan beyond the photo's edge
+  if (pw > stW) tx = Math.min(0, Math.max(stW - pw, tx));
+  if (ph > stH) ty = Math.min(0, Math.max(stH - ph, ty));
   const toScreen = (x: number, y: number) => ({ left: tx + s * x * size.w, top: ty + s * y * size.h });
   const arrived = sm(0.8, 1, q);
   const L = sel >= 0 ? layers[sel] : null;
@@ -130,7 +137,9 @@ export function Teardown({ source, copy = TEARDOWN_COPY }: { source?: ExploreSou
                 const r = data.parts[l.id]?.rect; if (!r) return null;
                 return (
                   <img key={l.id} src={img(dir, l.id)} alt="" aria-hidden="true" loading="lazy" decoding="async"
-                    className="absolute object-cover" style={{ left: `${r[0] * 100}%`, top: `${r[1] * 100}%`, width: `${(r[2] - r[0]) * 100}%`, height: `${(r[3] - r[1]) * 100}%`, opacity: i === shown ? sm(0.55, 1, q) : 0 }} />
+                    className="absolute object-cover" style={{ left: `${r[0] * 100}%`, top: `${r[1] * 100}%`, width: `${(r[2] - r[0]) * 100}%`, height: `${(r[3] - r[1]) * 100}%`, opacity: i === shown ? sm(0.55, 1, q) : 0,
+                      // feathered edges: the close-up melts into the photo around it, no seam
+                      maskImage: FEATHER_EDGES, WebkitMaskImage: FEATHER_EDGES, maskComposite: 'intersect', WebkitMaskComposite: 'source-in' }} />
                 );
               })}
             </div>
