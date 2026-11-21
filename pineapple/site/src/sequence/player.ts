@@ -205,6 +205,7 @@ export class SequencePlayer {
     const { g } = this, w = this.canvas.width, h = this.canvas.height;
     // tall screens keep `fit` of the width, wide screens `fitH` of the height, instead of cropping the subject
     const { x, y, w: iw, h: ih } = coverRect(w, h, im.naturalWidth, im.naturalHeight, fit, fitH);
+    g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
     if (ih < h - 1 || iw < w - 1) { g.fillStyle = '#0a0b08'; g.fillRect(0, 0, w, h); }
     g.drawImage(im, x, y, iw, ih);
     const e0 = 90 * (window.devicePixelRatio || 1);
