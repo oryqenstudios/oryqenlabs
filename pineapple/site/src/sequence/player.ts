@@ -11,7 +11,7 @@
 import { SHOTS, type Shot } from '../data/shots';
 import { PAINT, type PaintOpts } from './placeholders';
 import { pad } from '../lib/math';
-import { isSmallScreen } from '../lib/tokens';
+import { isSmallScreen, reducedMotion } from '../lib/tokens';
 
 interface ShotEntry { frames: number; ready: boolean; mobile?: boolean; /** finishes with their own frames, in shot-NN/<finish>/ */ variants?: string[] }
 interface Manifest { ext: string; stills: { ready: string[]; mobile?: boolean }; shots: Record<string, ShotEntry> }
@@ -66,7 +66,7 @@ export class SequencePlayer {
     loadManifest().then(m => { this.manifest = m; this.draw(); });
   }
 
-  dispose() { this.disposed = true; this.ro.disconnect(); this.queue = []; cancelAnimationFrame(this.fadeRaf); }
+  dispose() { this.disposed = true; this.ro.disconnect(); this.queue = []; cancelAnimationFrame(this.fadeRaf); cancelAnimationFrame(this.easeRaf); }
 
   /** Begin downloading frames. Called when the section approaches the viewport. */
   start() {
@@ -119,10 +119,25 @@ export class SequencePlayer {
     return v ? `${s.id}/${v}` : String(s.id);
   }
 
+  /** Scroll sets a target; the shown position eases towards it and draws between frames (cross-blending the two
+   *  nearest), so even a long scroll over a short clip moves continuously rather than in steps. */
   set(p: number) {
-    this.p = Math.min(1, Math.max(0, p));
-    const f = Math.round(this.p * (this.total - 1));
-    if (f !== this.frame) { this.frame = f; this.draw(); }
+    this.target = Math.min(1, Math.max(0, p));
+    if (reducedMotion() || this.frame < 0) { this.p = this.target; this.show(); return; }
+    if (!this.easeRaf) this.easeRaf = requestAnimationFrame(this.ease);
+  }
+  private target = 0;
+  private frac = 0;
+  private easeRaf = 0;
+  private ease = () => {
+    const d = this.target - this.p;
+    this.p = Math.abs(d) < 0.0004 ? this.target : this.p + d * 0.32;
+    this.show();
+    this.easeRaf = this.p === this.target ? 0 : requestAnimationFrame(this.ease);
+  };
+  private show() {
+    const pos = this.p * (this.total - 1), f = Math.floor(pos + 1e-6), frac = pos - f;
+    if (f !== this.frame || Math.abs(frac - this.frac) > 0.015) { this.frame = f; this.frac = frac; this.draw(); }
   }
 
   private isReady(s: Shot) {
@@ -147,7 +162,9 @@ export class SequencePlayer {
       const im = new Image();
       im.decoding = 'async';
       this.inflight++;
-      im.onload = () => { this.inflight--; const arr = this.imgs.get(key); if (arr) arr[i] = im; if (this.locate(Math.max(0, this.frame)).s.id === id) this.draw(); this.pump(); };
+      // decode off the critical path before the frame is ever drawn, so scrubbing never stalls on a decode
+      const ready = () => { this.inflight--; const arr = this.imgs.get(key); if (arr) arr[i] = im; if (this.locate(Math.max(0, this.frame)).s.id === id) this.draw(); this.pump(); };
+      im.onload = () => { if (im.decode) im.decode().then(ready, ready); else ready(); };
       im.onerror = () => { this.inflight--; this.pump(); };
       im.src = this.urlFor(key, id, i);
     }
@@ -195,7 +212,12 @@ export class SequencePlayer {
       if (still.complete && still.naturalWidth) this.cover(still); else PAINT[0](g, w, h, 0.5, this.opts);
     } else if (im) {
       if (old && mix < 1 && old !== im) { this.cover(old, s.fit, s.fitH); g.globalAlpha = mix * mix * (3 - 2 * mix); this.cover(im, s.fit, s.fitH); g.globalAlpha = 1; }
-      else this.cover(im, s.fit, s.fitH);
+      else {
+        this.cover(im, s.fit, s.fitH);
+        // between frames: blend in the next one by how far we are towards it
+        const nx = this.frac > 0.02 && i + 1 < s.frames ? this.imgs.get(this.key(s))?.[i + 1] : null;
+        if (nx) { g.globalAlpha = this.frac; this.cover(nx, s.fit, s.fitH); g.globalAlpha = 1; }
+      }
     }
     else { g.save(); PAINT[s.id](g, w, h, s.frames > 1 ? i / (s.frames - 1) : 0, this.opts); g.restore(); }
     this.onFrame?.({ shot: s, frame: i, real });

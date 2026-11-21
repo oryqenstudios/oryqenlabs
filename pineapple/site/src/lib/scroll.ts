@@ -11,7 +11,7 @@ let lenis: Lenis | null = null;
 /** Smooth scrolling (Lenis) driving GSAP ScrollTrigger. Off for reduced-motion visitors. */
 export function initSmoothScroll() {
   if (lenis || reducedMotion()) return;
-  lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
+  lenis = new Lenis({ lerp: 0.075, smoothWheel: true, wheelMultiplier: 0.9 }); // a silkier glide
   lenis.on('scroll', ScrollTrigger.update);
   gsap.ticker.add(t => lenis?.raf(t * 1000));
   gsap.ticker.lagSmoothing(0);
