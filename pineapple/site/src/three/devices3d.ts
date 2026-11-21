@@ -7,7 +7,7 @@ import { PHONE, TABLET, type Layer, type DeviceKey } from '../data/devices';
 import { FINISHES, ZEST, type FinishKey, type ZestKey } from '../data/finishes';
 import { rng, lerp, sm } from '../lib/math';
 import { rr, hexShape, ext, normUV, cyl } from './geometry';
-import { drawScales, rindTexture, wallpaper, labelTexture, canvasTexture, TEX_LO, TEX_HI } from './textures';
+import { drawScales, rindTexture, wallpaper, labelTexture, canvasTexture, photoTexture, TEX_LO, TEX_HI } from './textures';
 
 export type AnyFinish = FinishKey | ZestKey;
 
@@ -85,12 +85,13 @@ export function buildPhone(): DeviceModel {
   const layers: LayerModel[] = [];
   const layer = makeLayerFactory(root, PHONE, layers);
 
-  const backTex = canvasTexture(drawScales(TEX_LO, 'phone', 'neutral'));
-  const bumpTex = canvasTexture(drawScales(TEX_LO, 'phone', 'ripen', true), false);
+  // photographed parts: the real screen, board, battery, vapour chamber and etched back glass (frames/parts/)
+  const backTex = photoTexture('back');
+  const bumpTex = photoTexture('back', false);
   const rind = rindTexture();
-  const screen = wallpaper(512, 1072);
-  const battery = labelTexture(256, 512, '#1a1b18', [['5,000 mAh', 34, '#f0b53a', 220], ['SILICON-CARBON', 14, '#9c9d8d', 250, 500]]);
-  const chipTex = labelTexture(256, 256, '#2a2b27', [['NECTAR', 30, '#d9c48a', 118, 700], ['N7 PRO', 22, '#9c9d8d', 152, 500]]);
+  const screen = photoTexture('screen');
+  const boardTex = photoTexture('board'), batteryTex = photoTexture('battery'), coolTex = photoTexture('cooling');
+  const photo = (map: THREE.Texture, extra: Partial<THREE.MeshStandardMaterialParameters> = {}) => std({ map, color: 0xffffff, transparent: true, alphaTest: 0.4, roughness: 0.5, ...extra });
 
   // brushed titanium: anisotropic sheen along the rails, rind micro-texture as bump
   const frameMat = phys({ color: 0xb6a065, metalness: 1, roughness: 0.32, anisotropy: 0.7, anisotropyRotation: Math.PI / 2, bumpMap: rind, bumpScale: 0.6 });
@@ -120,32 +121,29 @@ export function buildPhone(): DeviceModel {
     for (const y of [3.1, 1.75]) { const v = add(ext(rr(0.95, 0.26, 0.12), 0.1, 0.02), keyMat); v.rotation.set(0, Math.PI / 2, Math.PI / 2); v.position.set(-W / 2 - 0.05, y, 0); }
     const usb = add(ext(rr(0.9, 0.3, 0.14), 0.4, 0), std({ color: 0x0c0c0c })); usb.rotation.x = Math.PI / 2; usb.position.set(0, -H / 2 + 0.02, 0);
   });
-  // 4 logic board
+  // 4 logic board: the photographed board over a thin double-stacked PCB body
   layer(3, 0.16, (add, L) => {
-    const bw = W - 1.3, bh = H * 0.42, by = H * 0.2, pcb = std({ color: 0x1f2b22, roughness: 0.55, metalness: 0.2 });
-    add(ext(rr(bw, bh, 0.3, 0, by), 0.08, 0.01), pcb).position.z = 0.08;
-    add(ext(rr(bw, bh, 0.3, 0, by), 0.08, 0.01), pcb).position.z = -0.08;
+    const bh = H * 0.42, bw = bh * 0.776, by = H * 0.2, pcb = std({ color: 0x14201a, roughness: 0.55, metalness: 0.2 });
+    add(ext(rr(bw * 0.96, bh * 0.96, 0.3, 0, by), 0.08, 0.01), pcb).position.z = 0.04;
+    add(ext(rr(bw * 0.96, bh * 0.96, 0.3, 0, by), 0.08, 0.01), pcb).position.z = -0.12;
     const post = std({ color: 0xb08d57, metalness: 1, roughness: 0.3 });
-    for (const [x, y] of [[-2, by - 2.5], [2, by - 2.5], [-2, by + 2.6], [2, by + 2.6]]) add(cyl(0.09, 0.16, 10), post).position.set(x, y, 0);
-    const chip = add(new THREE.BoxGeometry(1.3, 1.3, 0.14), std({ color: 0xffffff, map: chipTex, metalness: 0.6, roughness: 0.35 })); chip.position.set(-0.5, by + 0.5, 0.19); L.focus = chip; chip.name = 'chip';
-    const R2 = rng(3), comp = std({ color: 0x3a3c36, metalness: 0.4, roughness: 0.5 });
-    for (let i = 0; i < 34; i++) { const w = 0.12 + R2() * 0.45, h = 0.12 + R2() * 0.35, x = lerp(-bw / 2 + 0.4, bw / 2 - 0.4, R2()), y = by + lerp(-bh / 2 + 0.4, bh / 2 - 0.4, R2()); if (Math.abs(x + 0.5) < 0.9 && Math.abs(y - by - 0.5) < 0.9) continue; add(new THREE.BoxGeometry(w, h, 0.08), comp).position.set(x, y, 0.16); }
-    add(new THREE.BoxGeometry(0.9, 0.7, 0.1), std({ color: 0x2d2f29, metalness: 0.6, roughness: 0.4 })).position.set(1.3, by - 1.2, 0.17);
-    add(new THREE.BoxGeometry(1.1, 0.8, 0.1), std({ color: 0x161714, roughness: 0.5 })).position.set(1.2, by + 1.1, 0.17);
+    for (const [x, y] of [[-1.8, by - 2.5], [1.8, by - 2.5], [-1.8, by + 2.6], [1.8, by + 2.6]]) add(cyl(0.09, 0.16, 10), post).position.set(x, y, -0.04);
+    const top = add(new THREE.PlaneGeometry(bw, bh), photo(boardTex, { roughness: 0.45, metalness: 0.15 })); top.position.set(0, by, 0.125);
+    // the processor's polished lid, where it sits in the photo: the breakdown's focus and chip reading
+    const chip = add(new THREE.BoxGeometry(bw * 0.33, bw * 0.33, 0.06), std({ color: 0xc9ccce, metalness: 1, roughness: 0.22 }));
+    chip.position.set(-bw * 0.03, by + bh * 0.08, 0.16); L.focus = chip; chip.name = 'chip';
   });
-  // 5 Core cooling chamber
+  // 5 Core cooling chamber: the photographed steel plate over a graphite sheet
   layer(4, 0.06, add => {
-    const cw = W - 1.6, ch = H * 0.6;
-    add(ext(rr(cw, ch, 0.5, 0, H * 0.08), 0.03, 0.012), std({ color: 0xc4c7c9, metalness: 1, roughness: 0.24 }));
-    add(ext(rr(cw + 0.4, ch + 0.6, 0.5, 0, H * 0.08), 0.02, 0), std({ color: 0x2b2b2a, roughness: 0.85 })).position.z = -0.05;
-    const wick = std({ color: 0x9ea2a5, metalness: 1, roughness: 0.3 });
-    for (let i = 0; i < 7; i++) add(new THREE.BoxGeometry(0.05, ch * 0.85, 0.015), wick).position.set(-cw / 2 + 0.55 + (i * (cw - 1.1)) / 6, H * 0.08, 0.022);
+    const ch = H * 0.6, cw = ch * 0.592;
+    add(ext(rr(cw * 0.94, ch * 0.96, 0.5, 0, H * 0.08), 0.02, 0), std({ color: 0x2b2b2a, roughness: 0.85 })).position.z = -0.04;
+    const plate = add(new THREE.PlaneGeometry(cw, ch), photo(coolTex, { metalness: 0.75, roughness: 0.3 })); plate.position.set(0, H * 0.08, 0.02);
   });
-  // 6 battery
+  // 6 battery: the photographed cell on a slab of its own thickness
   layer(5, -0.05, add => {
-    const bw = W - 1.4, bh = H * 0.44;
-    add(normUV(ext(rr(bw, bh, 0.35, 0, -H * 0.2), 0.34, 0.03), bw, bh, 0, -H * 0.2), std({ map: battery, roughness: 0.55, color: 0xffffff }));
-    add(new THREE.BoxGeometry(1.2, 0.3, 0.06), std({ color: 0xb08d57, metalness: 1, roughness: 0.3 })).position.set(0, -H * 0.2 + bh / 2 + 0.12, 0);
+    const bh = H * 0.44, bw = bh * 0.62, by = -H * 0.2;
+    add(ext(rr(bw * 0.9, bh * 0.9, 0.3, 0, by - bh * 0.03), 0.34, 0.03), std({ color: 0x121311, roughness: 0.7 }));
+    const top = add(new THREE.PlaneGeometry(bw, bh), photo(batteryTex, { roughness: 0.6 })); top.position.set(0, by, 0.2);
   });
   // 7 Prism camera system on its scale-shaped plateau
   layer(6, -0.47, (add, L) => {
@@ -216,8 +214,7 @@ export function buildPhone(): DeviceModel {
     upgradeTextures() {
       if (res === TEX_HI()) return;
       res = TEX_HI();
-      swapImage(backTex, drawScales(res, 'phone', 'neutral'));
-      swapImage(bumpTex, drawScales(Math.min(res, 2048), 'phone', 'ripen', true));
+      // the back glass is a photograph now; nothing to redraw
     },
   };
 }

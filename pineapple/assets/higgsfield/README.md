@@ -232,3 +232,7 @@ Request IDs for all of these are in the session log as `water-v2`, `slate-edge-v
 - `shot-19-into-the-speaker.mp4`: from the grille macro (`sound-grille.jpg`) through a speaker hole into the cut-away module (`speaker-cutaway.jpg`), 1080p, 5 s.
 - `shot-20-bass-in-action.mp4`: the diaphragm pumping and air pushed out through the grille, first frame only, 1080p, 5 s; the site loops it forward and back.
 Request IDs: `speaker-dive`, `speaker-bass`, `speaker-cutaway` in the session log.
+
+## Breakdown textures
+
+- `bd-board.jpg`, `bd-battery.jpg`, `bd-cooling.jpg`, `bd-back.jpg`: top-down studio photos (Qwen Image 3 text-to-image) used as textures on the hands-on 3D breakdown, cut out to `site/public/frames/parts/`. The screen texture is cropped from the front studio shot.

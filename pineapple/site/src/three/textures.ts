@@ -74,3 +74,15 @@ export function labelTexture(w: number, h: number, bg: string, lines: [string, n
   for (const [t, s, col, y, wt] of lines) { g.fillStyle = col; g.font = `${wt ?? 600} ${s}px Inter, sans-serif`; g.fillText(t, w / 2, y); }
   return canvasTexture(c);
 }
+
+/** A photographed part (frames/parts/<name>.webp) as a texture. Shows a neutral tone until the photo arrives, then
+ *  wakes the stage so it redraws. */
+export function photoTexture(name: string, srgb = true) {
+  const c = document.createElement('canvas'); c.width = c.height = 2;
+  const g = c.getContext('2d')!; g.fillStyle = '#1a1b18'; g.fillRect(0, 0, 2, 2);
+  const t = new THREE.Texture(c); if (srgb) t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; t.needsUpdate = true;
+  const im = new Image(); im.decoding = 'async';
+  im.onload = () => { t.dispose(); t.image = im; t.needsUpdate = true; import('./store').then(m => m.stage.wake()); };
+  im.src = `${import.meta.env.BASE_URL}frames/parts/${name}.webp`;
+  return t;
+}
