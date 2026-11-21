@@ -9,6 +9,10 @@ W, H, T = 1080, 1920, 12; FD = '/usr/share/fonts/opentype/inter/'
 F = lambda n, s: ImageFont.truetype(FD + n, s)
 GOLD, CREAM, MUTE = (240, 181, 58), (243, 241, 230), (156, 157, 141)
 clips = json.load(open(f'{SRC}/clips.json'))
+# under each clip: what you are watching someone do (keep in step with highlights.cjs)
+DETAILS = ['4K splash footage · one continuous scroll', 'A beam of light reveals it · tap a hotspot to zoom', 'Tap a finish · the phone repaints live',
+           'Real photographed layers · drag any one out', 'Drag the slider · ultra-wide to 25× zoom', 'Macro-photographed board · tap a part for specs',
+           'Scroll inside the speaker · watch the bass move', 'IP68 · 6 m for 30 minutes', 'Lift the Quill · draw on the screen', 'Three models · five finishes']
 ease = lambda t: 1 - (1 - max(0, min(1, t))) ** 3
 FG_W, FG_H = W, round(W * 9 / 16); FG_Y = (H - FG_H) // 2 + 60
 def vignette():
@@ -40,6 +44,14 @@ def clip_frame(job):
     a_in = lambda k: ease((i - 4 - 3 * k) / 12) * (1 - ease((i - (n - 14)) / 10))
     la = a_in(0); d.text((W // 2, 330), label.upper(), font=F('Inter-SemiBold.otf', 30), fill=tuple(int(c * la + 5 * (1 - la)) for c in GOLD), anchor='mm')
     cap = words_layer(caption, F('InterDisplay-Bold.otf', 86), lambda k: a_in(k + 1), CREAM); im.paste(cap, (0, 370), cap)
+    da = a_in(4); d.text((W // 2, FG_Y + FG_H + 92 + 24 * (1 - da)), DETAILS[ci % len(DETAILS)], font=F('Inter-Medium.otf', 38), fill=tuple(int(c * da + 5 * (1 - da)) for c in MUTE), anchor='mm')
+    # story-style progress: one segment per clip, this one filling
+    sw, gap = 72, 10; x = (W - (len(clips) * sw + (len(clips) - 1) * gap)) // 2
+    for k in range(len(clips)):
+        d.rounded_rectangle((x, 1700, x + sw, 1705), 3, fill=(52, 48, 40))
+        f = 1 if k < ci else (i + 1) / n if k == ci else 0
+        if f: d.rounded_rectangle((x, 1700, x + max(5, int(sw * f)), 1705), 3, fill=GOLD)
+        x += sw + gap
     d.text((W // 2, 1790), 'pineappleconcept.com', font=F('Inter-SemiBold.otf', 32), fill=GOLD, anchor='mm')
     im.save(f'{TMP}/c{ci:02d}_{i:05d}.jpg', quality=94); return f'{TMP}/c{ci:02d}_{i:05d}.jpg'
 def card(job):
@@ -70,7 +82,7 @@ def transition(job):
         e = (1 - math.cos(math.pi * t)) / 2; off = int(W * e)
         canvas = Image.new('RGB', (W * 2, H)); canvas.paste(A, (0, 0)); canvas.paste(B, (W, 0))
         arr = np.asarray(canvas).astype(np.float32); blur = int(90 * math.sin(math.pi * t)) + 1
-        acc = sum(arr[:, off + k: off + k + W] for k in range(0, blur, max(1, blur // 8))) / len(range(0, blur, max(1, blur // 8)))
+        ks = range(0, blur, max(1, blur // 8)); acc = sum(arr[:, min(W, off + k): min(W, off + k) + W] for k in ks) / len(ks)
         im = Image.fromarray(np.clip(acc, 0, 255).astype(np.uint8))
     else:  # gold light sweep
         im = Image.blend(A, B, t); band = Image.new('L', (W, H), 0); cx = int(-400 + (W + 800) * t)
