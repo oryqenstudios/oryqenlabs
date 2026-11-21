@@ -222,13 +222,13 @@ export function buildTablet(): DeviceModel {
   const layers: LayerModel[] = [];
   const layer = makeLayerFactory(root, TABLET, layers);
 
-  const neutral = canvasTexture(drawScales(TEX_LO, 'tablet', 'neutral'));
-  const ripenTex = canvasTexture(drawScales(TEX_LO, 'tablet', 'ripen'));
+  const neutral = photoTexture('back'); // etched scales, neutral, for the tinted finishes
+  const ripenTex = photoTexture('slate-back'); // the photographed Ripen back, gold to green
   const bumpTex = canvasTexture(drawScales(TEX_LO, 'tablet', 'ripen', true), false);
   const screen = photoTexture('slate-screen'); // the real screen, from the studio photo
   // photographed parts: the board (turned to lie along the tablet) and the battery cells
   const tBoard = photoTexture('board'); tBoard.center.set(0.5, 0.5); tBoard.rotation = Math.PI / 2;
-  const tCell = photoTexture('battery');
+  const tCell = photoTexture('battery'), spkTex = photoTexture('speaker');
 
   const backMat = phys({ color: 0xffffff, map: ripenTex, bumpMap: bumpTex, bumpScale: 0.8, roughness: 0.4, metalness: 0.25, clearcoat: 0.4 });
   const sideMat = std({ color: 0xb6a065, metalness: 0.9, roughness: 0.32 });
@@ -254,7 +254,7 @@ export function buildTablet(): DeviceModel {
   layer(4, -0.05, add => {
     for (const x of [-1, 1]) { const w = W / 2 - 2, h = H * 0.6, cx = x * (W / 4 + 0.2); add(normUV(ext(rr(w, h, 0.4, cx, -H * 0.1), 0.3, 0.03), w, h, cx, -H * 0.1), std({ map: tCell, color: 0xffffff, transparent: true, alphaTest: 0.4, roughness: 0.6 })); }
   });
-  layer(5, 0, add => { const spk = std({ color: 0x26282a, roughness: 0.7 }); for (const sx of [-1, 1]) for (const sy of [-1, 1]) add(new THREE.BoxGeometry(2.6, 1.1, 0.3), spk).position.set(sx * (W / 2 - 2), sy * (H / 2 - 1.1), 0); });
+  layer(5, 0, add => { const spk = std({ color: 0x26282a, roughness: 0.7 }); for (const sx of [-1, 1]) for (const sy of [-1, 1]) { add(new THREE.BoxGeometry(2.6, 1.1, 0.3), spk).position.set(sx * (W / 2 - 2), sy * (H / 2 - 1.1), 0); add(new THREE.PlaneGeometry(2.5, 1.06), std({ map: spkTex, color: 0xffffff, roughness: 0.6, metalness: 0.3 })).position.set(sx * (W / 2 - 2), sy * (H / 2 - 1.1), 0.155); } });
   layer(6, 0, (add, L) => {
     add(new THREE.BoxGeometry(0.35, 12, 0.16), std({ color: 0x55585c, metalness: 0.85, roughness: 0.35 })).position.set(W / 2 - 0.35, 0, 0);
     const q = new THREE.Group(); q.position.set(W / 2 + 0.75, 0, 0); L.group.add(q); q.name = 'quill'; L.focus = q;
@@ -290,8 +290,6 @@ export function buildTablet(): DeviceModel {
     upgradeTextures() {
       const hi = Math.min(TEX_HI(), 2048);
       if (res === hi) return; res = hi;
-      swapImage(neutral, drawScales(hi, 'tablet', 'neutral'));
-      swapImage(ripenTex, drawScales(hi, 'tablet', 'ripen'));
       swapImage(bumpTex, drawScales(Math.min(hi, 1024), 'tablet', 'ripen', true));
     },
   };
