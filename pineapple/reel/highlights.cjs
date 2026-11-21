@@ -59,11 +59,13 @@ const ease = t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
   start('08 · Durability', 'Six metres down.\nStill on.'); await scroll('#water .scrub', 0.0, 1, 3);
   start('09 · Slate Pro', 'Pick up the Quill.\nDraw.'); await scroll('[aria-label="Draw on Slate Pro"]', 0.12, 0.7, 2.2);
   { const [cx, cy, w, h] = await center('canvas[aria-label="Drawing surface on the Slate Pro screen"]'); const x0 = cx - w * 0.3, y0 = cy;
-    await glide(x0, y0, 0.5); cur.ring = 0; await page.mouse.down();
-    for (let i = 1; i <= 54; i++) { const q = i / 54; await mv(x0 + w * 0.6 * q, y0 + h * 0.2 * Math.sin(q * Math.PI * 3)); await shot(); } await page.mouse.up(); await hold(0.6); }
+    // a cursive run of loops; once the Quill is down it is the pointer, so the arrow fades out
+    const r = h * 0.075, at = q => [x0 + w * 0.6 * q - r * Math.sin(q * Math.PI * 8), y0 - h * 0.06 * Math.sin(q * Math.PI) + r * Math.cos(q * Math.PI * 8) - r];
+    await glide(...at(0), 0.5); cur.ring = 0; await page.mouse.down(); cur.to = 0;
+    for (let i = 1; i <= 72; i++) { await mv(...at(ease(i / 72))); await shot(); } await page.mouse.up(); await hold(0.6); }
   start('10 · Compare', 'Build yours.'); await scroll('compare', 0.0, 0.0, 0.3);
-  { const y = await page.evaluate(() => { const e = [...document.querySelectorAll('#compare button')].find(b => b.textContent.trim() === 'Zest'); return e.getBoundingClientRect().top + scrollY - 900; });
+  { const y = await page.evaluate(() => { const b = document.querySelector('#compare .mt-20').getBoundingClientRect(); return b.top + scrollY + b.height / 2 - innerHeight / 2; }); // the builder, centred
     await page.evaluate(y => window.scrollTo(0, y), y); await page.clock.runFor(500); await page.waitForTimeout(500); }
-  await hold(0.5); await tap('Zest', '#compare'); await hold(0.9); await tap('Slate Pro', '#compare'); await hold(0.9); await tap('Crown Pro', '#compare'); await hold(0.8);
+  await hold(0.5); await tap('Zest', '#compare'); await hold(0.9); await tap('Slate Pro', '#compare'); await hold(0.9); await tap('Crown Pro', '#compare'); await hold(0.8); await tap('Crown Green', '#compare'); await hold(1.0);
   fs.writeFileSync(`${OUT}/clips.json`, JSON.stringify(clips.map(c => ({ ...c, frames: fs.readdirSync(c.dir).length })))); console.log('clips', clips.length); await b.close();
 })();
