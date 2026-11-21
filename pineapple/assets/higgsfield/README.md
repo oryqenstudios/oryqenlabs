@@ -239,3 +239,7 @@ Request IDs: `speaker-dive`, `speaker-bass`, `speaker-cutaway` in the session lo
 - `bd-small.jpg`, `bd-coil.jpg`: top-down photos for the small-parts and charging-coil layers; `bd-camera.jpg` was not used (it showed a different lens layout). Slate Pro's display layer uses its screen cropped from `slate-front.jpg`.
 - `bd-slate-back.jpg` (Ripen back panel, cropped above the corner camera) and `bd-speaker.jpg` (speaker grille): Slate Pro breakdown textures; other finishes use the neutral `bd-back.jpg`, tinted.
 - `bd-frame.jpg`, `bd-tcam.jpg`, `bd-strip.jpg`, `bd-kbd.jpg`: photos for the Crown Pro frame and the Slate Pro camera, Quill strip and keyboard connector. The Crown Pro camera is cut from `teardown-phone-camera.jpg`; the Slate Pro Quill uses the Slate section cut-out.
+
+## 4K masters
+
+`4k-<name>.mp4`: 4K re-renders (Kling 3.0 4K, same first/last frames and prompts as the 1080p takes) of the Design reveal (reveal-a, reveal-b, zoom-scales, zoom-key), Inside (inside-explode, inside-assemble), Camera (camera-approach, shot6) and the chip dive. Request IDs: `<name>-4k` in the session log. Footage frames are now AVIF (`site/scripts/avif.py`).

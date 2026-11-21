@@ -1,5 +1,5 @@
 {
-  "ext": "webp",
+  "ext": "avif",
   "note": "Set ready:true once a shot's frames are in public/frames/shot-NN/0001.webp … Optional phone-sized copies go in public/frames/mobile/shot-NN/ with mobile:true.",
   "stills": {
     "ready": [
