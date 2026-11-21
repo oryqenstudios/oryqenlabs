@@ -2,6 +2,8 @@
 
 ## Summary reel (under a minute)
 
+The current cut is `pineapple-summary-reel.mp4` (54.9 s, 1080×1920, 30 fps, H.264, no audio).
+
 Ten highlights of the live site, each showing its interaction, cut together for a 1080×1920, 30 fps reel. The whole
 desktop page is in frame: every clip is recorded at 1920×1080 and laid full width across the reel over a blurred copy of
 itself, under a kinetic caption. There is a title card at the start and an end card, and the transitions rotate between
