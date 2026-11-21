@@ -125,8 +125,8 @@ export function Camera() {
   );
 }
 
-/** 07 · Inside the chip. Shot 7 dives from the package into the bare die; performance numbers count up with scroll.
- *  Then the die, photographed: pick a block and the camera moves in on its finest structure. */
+/** 07 · Inside the chip. Shot 7 glides in from the whole logic board to the processor in its steel frame (4K); the
+ *  performance numbers count up with scroll. Then the board, photographed: pick a part and the camera moves in. */
 export function Chip() {
   return (
     <section id="chip">
@@ -142,7 +142,7 @@ export function Chip() {
           );
         }}
       </ScrubSection>
-      <Teardown source={CHIP} copy={{ id: 'die', label: 'Nectar N7 Pro · the die, photographed', title: 'Every block,', accent: 'up close.', blurb: 'Pick a block and the camera moves in on the silicon. Move over the photo to steer. Numbers mark the structures; the panel lists every spec.', unit: 'blocks' }} />
+      <Teardown source={CHIP} copy={{ id: 'die', label: 'Nectar N7 Pro · on the board, photographed', title: 'Every part,', accent: 'up close.', blurb: 'Pick a part and the camera moves in. Move over the photo to steer. Numbers mark the details; the panel lists every spec.', unit: 'parts' }} />
     </section>
   );
 }

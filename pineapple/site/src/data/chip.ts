@@ -1,26 +1,22 @@
 import type { ExploreSource } from '../sections/Teardown';
 
-/** Nectar N7 Pro, photographed: the die and its blocks (frames/chip/die.webp, frames/chip/die/<block>.webp).
- *  Block rects are where each sits on the die; macros are exact crops of them, sharpened. Specs are placeholders. */
+/** Nectar N7 Pro on the logic board, photographed (frames/chip/board.webp, frames/chip/board/<part>.webp). Part rects are
+ *  where each sits in the photo; close-ups are exact crops of them, sharpened. Specs are placeholders. */
 export const CHIP: ExploreSource = {
   name: 'Nectar N7 Pro',
-  dir: 'chip/die',
+  dir: 'chip/board',
   layers: [
-    { id: 'perf', name: "Performance cores", story: "Two big cores for the heaviest work, each with wide execution and deep prediction.", specs: ["2 performance cores", "Up to 4.4 GHz", "Wide out-of-order execution", "Per-core L1: 192 KB instruction, 128 KB data"], mm: "2 cores", temp: 38 },
-    { id: 'l2', name: "Performance L2 cache", story: "A fast shared cache sits right beside the big cores.", specs: ["16 MB shared L2", "Perfectly regular SRAM banks", "Shared by both performance cores"], mm: "16 MB", temp: 38 },
-    { id: 'eff', name: "Efficiency cores", story: "Four small cores do most of the day’s work on a sliver of power.", specs: ["4 efficiency cores", "Up to 2.9 GHz", "Shared 4 MB L2"], mm: "4 cores", temp: 38 },
-    { id: 'gpu', name: "GPU", story: "Six shader cores with hardware ray tracing for console-class graphics.", specs: ["6-core GPU", "Hardware ray tracing", "Mesh shading", "Dynamic caching"], mm: "6 cores", temp: 38 },
-    { id: 'npu', name: "Neural engine", story: "Thirty-two identical cores run on-device intelligence privately.", specs: ["32-core neural engine", "45 trillion operations per second", "Shared local buffer"], mm: "32 cores", temp: 38 },
-    { id: 'slc', name: "System cache", story: "A large last-level cache feeds every block on the die.", specs: ["24 MB system-level cache", "Shared by CPU, GPU and neural engine", "Cuts trips to memory"], mm: "24 MB", temp: 38 },
-    { id: 'io', name: "Memory and I/O", story: "The edges carry memory interfaces and the pads that connect the die to the world.", specs: ["LPDDR6 memory interface", "12 GB unified memory", "USB4 and display controllers", "Bond pads and seal ring"], mm: "Edge", temp: 38 },
+    { id: 'chip', name: "Nectar N7 Pro", story: "The chip at the centre of everything, held flat on the board by a polished steel frame.", specs: ["2 nm process", "6-core CPU (2 performance, 4 efficiency)", "6-core GPU with hardware ray tracing", "32-core neural engine", "12 GB unified memory"], mm: "2 nm", temp: 38 },
+    { id: 'caps', name: "Polymer capacitors", story: "A bank of capacitors smooths the power the chip draws in microsecond bursts.", specs: ["Aluminium polymer, very low resistance", "Placed millimetres from the chip"], mm: "Power", temp: 38 },
+    { id: 'pmic', name: "Power management", story: "Turns the battery's single voltage into the dozens of rails the board needs.", specs: ["Multi-rail power management chip", "Fine-pitch metal leads"], mm: "Power", temp: 38 },
+    { id: 'tant', name: "Tantalum capacitors", story: "Stable under heat, they steady the camera and display power.", specs: ["Tantalum polymer", "High capacity in a tiny package"], mm: "Power", temp: 38 },
+    { id: 'conn', name: "Board connectors", story: "Where the display, cameras and battery plug in.", specs: ["Board-to-board connectors", "Shielded against interference"], mm: "I/O", temp: 38 },
   ],
   parts: {
-    perf: { rect: [0.0866, 0.039, 0.2734, 0.371], markers: [{ x: 0.3, y: 0.3, label: "Execution units" }, { x: 0.65, y: 0.6, label: "Branch prediction and decode" }, { x: 0.5, y: 0.85, label: "Register files" }] },
-    l2: { rect: [0.3033, 0.0425, 0.4867, 0.4775], markers: [{ x: 0.3, y: 0.3, label: "SRAM banks" }, { x: 0.82, y: 0.12, label: "Tag and control arrays" }, { x: 0.5, y: 0.75, label: "Sense amplifiers" }] },
-    eff: { rect: [0.0713, 0.4783, 0.2387, 0.7017], markers: [{ x: 0.22, y: 0.5, label: "Core 1" }, { x: 0.5, y: 0.5, label: "Core 2" }, { x: 0.78, y: 0.5, label: "Core 3" }, { x: 0.5, y: 0.87, label: "Shared L2" }] },
-    gpu: { rect: [0.6681, 0.0925, 0.9119, 0.4175], markers: [{ x: 0.2, y: 0.25, label: "Shader core" }, { x: 0.55, y: 0.55, label: "Ray-tracing unit" }, { x: 0.85, y: 0.85, label: "GPU cache" }] },
-    npu: { rect: [0.7114, 0.4775, 0.8886, 0.7925], markers: [{ x: 0.2, y: 0.3, label: "One of 32 neural cores" }, { x: 0.55, y: 0.62, label: "Multiply–accumulate array" }, { x: 0.93, y: 0.5, label: "Shared buffer" }] },
-    slc: { rect: [0.2781, 0.4725, 0.5519, 0.8375], markers: [{ x: 0.3, y: 0.5, label: "Cache banks" }, { x: 0.7, y: 0.12, label: "Bank control strip" }, { x: 0.5, y: 0.92, label: "Memory fabric" }] },
-    io: { rect: [0.0, 0.7851, 0.1573, 0.9949], markers: [{ x: 0.2, y: 0.3, label: "Memory interface" }, { x: 0.55, y: 0.5, label: "ESD protection" }, { x: 0.8, y: 0.4, label: "Bond pads" }, { x: 0.9, y: 0.95, label: "Seal ring" }] },
+    chip: { rect: [0.2784, 0.1662, 0.7416, 0.7838], markers: [{ x: 0.5, y: 0.5, label: "Bare silicon die" }, { x: 0.2, y: 0.18, label: "Steel retention frame" }, { x: 0.5, y: 0.28, label: "Gold contact rows" }, { x: 0.84, y: 0.84, label: "Mounting screw" }] },
+    caps: { rect: [0.6233, 0.0094, 0.8567, 0.3206], markers: [{ x: 0.4, y: 0.4, label: "Polymer capacitor" }, { x: 0.6, y: 0.78, label: "Solder fillet" }] },
+    pmic: { rect: [0.0288, 0.6822, 0.1612, 0.9178], markers: [{ x: 0.5, y: 0.45, label: "Power-management chip" }, { x: 0.5, y: 0.86, label: "Metal leads" }] },
+    tant: { rect: [0.7314, 0.2175, 0.8186, 0.3725], markers: [{ x: 0.5, y: 0.45, label: "Tantalum capacitor" }, { x: 0.5, y: 0.86, label: "Terminal and solder" }] },
+    conn: { rect: [0.0, 0.381, 0.1006, 0.699], markers: [{ x: 0.5, y: 0.4, label: "Connector" }, { x: 0.5, y: 0.8, label: "Shield and pins" }] },
   },
 };

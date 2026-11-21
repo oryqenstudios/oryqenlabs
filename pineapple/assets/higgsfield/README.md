@@ -243,3 +243,4 @@ Request IDs: `speaker-dive`, `speaker-bass`, `speaker-cutaway` in the session lo
 ## 4K masters
 
 `4k-<name>.mp4`: 4K re-renders (Kling 3.0 4K, same first/last frames and prompts as the 1080p takes) of the Design reveal (reveal-a, reveal-b, zoom-scales, zoom-key), Inside (inside-explode, inside-assemble), Camera (camera-approach, shot6) and the chip dive. Request IDs: `<name>-4k` in the session log. Footage frames are now AVIF (`site/scripts/avif.py`).
+- `chip-board.png` / `chip-board-4k.jpg`: the logic board macro (chip in a steel retention frame), sharpened to 4096 px in quarters; `chip-board-<part>.jpg` close-ups; `4k-board-dive.mp4`: the 4K move from the board into the processor (shot 7). Request IDs `board*` in the session log.

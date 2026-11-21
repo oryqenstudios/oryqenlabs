@@ -18,7 +18,7 @@ export const SHOTS: Record<number, Shot> = {
   4: { id: 4, title: 'Exploded view', frames: 120, fit: 0.7, fitH: 1.1, alt: 'The phone, seen from the back, separates into its ten layers, which glide apart into a row: front glass, display, frame, logic board, cooling plate, battery, camera, small parts, charging coil and back glass.' },
   5: { id: 5, title: 'Back together', frames: 120, fit: 0.7, fitH: 1.1, alt: 'The ten layers glide back together and the phone turns to face you, its screen on.' },
   6: { id: 6, title: 'Lens fly-in', frames: 150, fit: 0.85, fitH: 1.1, alt: 'The view flies into the periscope lens, where a beam of light folds through a prism onto the sensor.' },
-  7: { id: 7, title: 'Chip dive', frames: 150, alt: 'The view descends onto the Nectar chip on the logic board; its metal lid lifts away to reveal the bare, iridescent silicon die.' },
+  7: { id: 7, title: 'Chip dive', frames: 150, alt: 'The view glides in across the logic board, past capacitors and chips, to the processor held in a polished steel frame, its bare die glowing gold.' },
   8: { id: 8, title: 'Etched glass sweep', frames: 120, alt: 'A raking light sweeps across the back glass and reveals the etched spiral pattern.' },
   9: { id: 9, title: 'Underwater', frames: 150, alt: 'The phone enters clear water screen first, turns over as it sinks and comes to rest standing on the sand six metres down.' },
   11: { id: 11, title: 'Pull back to the crown', frames: 120, fit: 0.55, fitH: 1.1, alt: 'The view pulls back out of the lens to the whole phone standing in front of giant brushed-gold letters spelling CROWN.' },
