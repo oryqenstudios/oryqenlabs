@@ -132,7 +132,7 @@ export class SequencePlayer {
   }
   private url(s: Shot, i: number) {
     const m = this.manifest!;
-    if (s.id === 0) return `${BASE}frames/${m.stills.mobile && isSmallScreen() ? 'mobile/' : ''}shot-00/${this.opts.device === 'tablet' ? 'slate-' : ''}${this.opts.fin ?? 'ripen'}.${m.ext}`;
+    if (s.id === 0) return `${BASE}frames/${m.stills.mobile && isSmallScreen() ? 'mobile/' : ''}shot-00/${this.opts.device === 'tablet' ? 'slate-' : ''}${this.opts.fin ?? 'ripen'}.webp`; // stills stay WebP
     const mobile = m.shots[s.id]?.mobile && isSmallScreen();
     const v = this.variant.get(s.id);
     return `${BASE}frames/${mobile ? 'mobile/' : ''}shot-${pad(s.id, 2)}/${v ? `${v}/` : ''}${pad(i + 1, 4)}.${m.ext}`;

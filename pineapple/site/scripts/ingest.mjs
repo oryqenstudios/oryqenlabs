@@ -7,7 +7,7 @@
  *
  * Video: samples exactly the manifest's frame count for the shot evenly across the clip (or the
  * --from/--to segment), cover-crops to 16:9, and writes 2560×1440 WebP frames to
- * public/frames/shot-NN/0001.webp… (quality 90) plus 1920×1080 copies to public/frames/mobile/shot-NN/ (phones crop into the frame).
+ * public/frames/shot-NN/0001.avif… (AVIF, CRF 26) plus 1920×1080 copies to public/frames/mobile/shot-NN/ (CRF 30; phones crop into the frame).
  * --frames sets the shot's frame count first (keep src/data/shots.ts in step). --variant <finish> writes one finish's
  * take of a per-finish shot (the hero) to shot-NN/<finish>/ and lists it in the manifest's `variants`.
  * Still: writes 3840×2160 (and 1920×1080 mobile) to public/frames/shot-00/[slate-]<finish>.webp.
@@ -56,6 +56,8 @@ const entry = manifest.shots[String(shot)] ??= { frames: 0, ready: false };
 if (arg('frames')) entry.frames = Number(arg('frames'));
 if (!(entry.frames > 0)) fail(`shot ${shot} has no frame count: pass --frames <n>`);
 const N = entry.frames;
+/** Footage frames are AVIF (SVT-AV1 stills, CRF 26 desktop / 30 phones): about a third the size of WebP at the same quality. */
+const EXT = manifest.ext = 'avif';
 const variant = arg('variant');
 if (variant !== undefined && !FINISHES.includes(variant)) fail(`--variant must be one of ${FINISHES.join(', ')}`);
 const sub = variant ? `/${variant}` : '';
@@ -67,14 +69,14 @@ const span = to - from;
 const src = probe.streams?.[0];
 if (src && (src.width < 1920 || src.height < 1080)) console.warn(`ingest: source is ${src.width}×${src.height}; frames are upscaled to 1440p (plan: upscale low-res clips first for best results)`);
 
-for (const [dir, w, h, q] of [[join(framesDir, `shot-${pad(shot, 2)}${sub}`), 2560, 1440, 90], [join(framesDir, 'mobile', `shot-${pad(shot, 2)}${sub}`), 1920, 1080, 84]]) {
+for (const [dir, w, h, q] of [[join(framesDir, `shot-${pad(shot, 2)}${sub}`), 2560, 1440, 26], [join(framesDir, 'mobile', `shot-${pad(shot, 2)}${sub}`), 1920, 1080, 30]]) {
   rmSync(dir, { recursive: true, force: true });
   mkdirSync(dir, { recursive: true });
   // N frames spread evenly over the segment, whatever the clip's own frame rate
-  ff(['-ss', String(from), '-t', String(span), '-i', input, '-vf', `fps=${N}/${span},${cover(w, h)}`, '-frames:v', String(N), '-c:v', 'libwebp', '-quality', String(q), '-compression_level', '4', join(dir, '%04d.webp')]);
-  let files = readdirSync(dir).filter(f => f.endsWith('.webp')).sort();
-  for (let i = files.length; i < N; i++) copyFileSync(join(dir, files[files.length - 1]), join(dir, `${pad(i + 1, 4)}.webp`)); // rounding can leave one short
-  files = readdirSync(dir).filter(f => f.endsWith('.webp'));
+  ff(['-ss', String(from), '-t', String(span), '-i', input, '-vf', `fps=${N}/${span},${cover(w, h)}`, '-frames:v', String(N), '-c:v', 'libsvtav1', '-crf', String(q), '-preset', '8', '-svtav1-params', 'still-picture=1', '-f', 'image2', join(dir, `%04d.${EXT}`)]);
+  let files = readdirSync(dir).filter(f => f.endsWith(`.${EXT}`)).sort();
+  for (let i = files.length; i < N; i++) copyFileSync(join(dir, files[files.length - 1]), join(dir, `${pad(i + 1, 4)}.${EXT}`)); // rounding can leave one short
+  files = readdirSync(dir).filter(f => f.endsWith(`.${EXT}`));
   console.log(`shot ${pad(shot, 2)}${sub} · ${w}×${h}: ${files.length} frames, ${mb(sizeOf(dir))}`);
 }
 entry.ready = true;

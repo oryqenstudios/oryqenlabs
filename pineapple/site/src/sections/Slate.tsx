@@ -44,7 +44,7 @@ const SCREEN = [0.2344, 0.1076, 0.7715, 0.8819] as const;
 const FIT = 0.6, FIT_H = 1.05;
 const TURN = [0.22, 0.42] as const, LIVE = 0.44; // the wallpaper turns into the page, then you draw
 /** Where the Quill rests beside the tablet (0–1 of the frame); it is a cut-out so you can pick it up. */
-const QUILL = [0.7725, 0.0859, 0.8042, 0.9089] as const;
+const QUILL = [0.7861, 0.1962, 0.8027, 0.8247] as const;
 const HAND = 28; // degrees the Quill leans in the hand
 
 function QuillPad() {
