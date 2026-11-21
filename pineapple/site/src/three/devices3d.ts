@@ -5,9 +5,9 @@
 import * as THREE from 'three';
 import { PHONE, TABLET, type Layer, type DeviceKey } from '../data/devices';
 import { FINISHES, ZEST, type FinishKey, type ZestKey } from '../data/finishes';
-import { rng, lerp, sm } from '../lib/math';
+import { sm } from '../lib/math';
 import { rr, hexShape, ext, normUV, cyl } from './geometry';
-import { drawScales, rindTexture, labelTexture, canvasTexture, photoTexture, TEX_LO, TEX_HI } from './textures';
+import { drawScales, rindTexture, canvasTexture, photoTexture, TEX_LO, TEX_HI } from './textures';
 
 export type AnyFinish = FinishKey | ZestKey;
 
@@ -226,8 +226,9 @@ export function buildTablet(): DeviceModel {
   const ripenTex = canvasTexture(drawScales(TEX_LO, 'tablet', 'ripen'));
   const bumpTex = canvasTexture(drawScales(TEX_LO, 'tablet', 'ripen', true), false);
   const screen = photoTexture('slate-screen'); // the real screen, from the studio photo
-  const cell = labelTexture(256, 512, '#1a1b18', [['21 Wh', 34, '#f0b53a', 240], ['CELL A · B', 14, '#9c9d8d', 270, 500]]);
-  const chipTex = labelTexture(256, 256, '#2a2b27', [['NECTAR', 30, '#d9c48a', 118, 700], ['N7 MAX', 22, '#9c9d8d', 152, 500]]);
+  // photographed parts: the board (turned to lie along the tablet) and the battery cells
+  const tBoard = photoTexture('board'); tBoard.center.set(0.5, 0.5); tBoard.rotation = Math.PI / 2;
+  const tCell = photoTexture('battery');
 
   const backMat = phys({ color: 0xffffff, map: ripenTex, bumpMap: bumpTex, bumpScale: 0.8, roughness: 0.4, metalness: 0.25, clearcoat: 0.4 });
   const sideMat = std({ color: 0xb6a065, metalness: 0.9, roughness: 0.32 });
@@ -240,9 +241,8 @@ export function buildTablet(): DeviceModel {
   });
   layer(2, 0.05, (add, L) => {
     add(ext(rr(W - 6, H * 0.2, 0.4, 0, H * 0.28), 0.1, 0.01), std({ color: 0x1f2b22, roughness: 0.55, metalness: 0.2 }));
-    const chip = add(new THREE.BoxGeometry(2.4, 2.4, 0.16), std({ color: 0xffffff, map: chipTex, metalness: 0.6, roughness: 0.35 })); chip.position.set(0, H * 0.28, 0.13); L.focus = chip; chip.name = 'chip';
-    const R2 = rng(9), comp = std({ color: 0x3a3c36, metalness: 0.4, roughness: 0.5 });
-    for (let i = 0; i < 26; i++) { const x = lerp(-W / 2 + 3.6, W / 2 - 3.6, R2()); const w = 0.2 + R2() * 0.7, h = 0.2 + R2() * 0.5, y = H * 0.28 + lerp(-2, 2, R2()); if (Math.abs(x) < 1.8) continue; add(new THREE.BoxGeometry(w, h, 0.1), comp).position.set(x, y, 0.1); }
+    const top = add(new THREE.PlaneGeometry(W - 6.2, H * 0.19), std({ map: tBoard, color: 0xffffff, transparent: true, alphaTest: 0.4, roughness: 0.45, metalness: 0.15 })); top.position.set(0, H * 0.28, 0.065);
+    const chip = add(new THREE.BoxGeometry(1.6, 1.6, 0.08), std({ color: 0xc9ccce, metalness: 1, roughness: 0.22 })); chip.position.set(0, H * 0.28, 0.1); L.focus = chip; chip.name = 'chip';
   });
   layer(3, -0.33, (add, L) => {
     add(ext(hexShape(1.35, CX, CY), 0.18, 0.03), plateauMat);
@@ -252,7 +252,7 @@ export function buildTablet(): DeviceModel {
     add(new THREE.SphereGeometry(0.22, 24, 16), phys({ color: 0x07080b, roughness: 0.05, clearcoat: 1 })).position.set(W / 2 - 0.55, 0, 0.2); // front camera, landscape edge
   });
   layer(4, -0.05, add => {
-    for (const x of [-1, 1]) { const w = W / 2 - 2, h = H * 0.6, cx = x * (W / 4 + 0.2); add(normUV(ext(rr(w, h, 0.4, cx, -H * 0.1), 0.3, 0.03), w, h, cx, -H * 0.1), std({ map: cell, roughness: 0.55 })); }
+    for (const x of [-1, 1]) { const w = W / 2 - 2, h = H * 0.6, cx = x * (W / 4 + 0.2); add(normUV(ext(rr(w, h, 0.4, cx, -H * 0.1), 0.3, 0.03), w, h, cx, -H * 0.1), std({ map: tCell, color: 0xffffff, transparent: true, alphaTest: 0.4, roughness: 0.6 })); }
   });
   layer(5, 0, add => { const spk = std({ color: 0x26282a, roughness: 0.7 }); for (const sx of [-1, 1]) for (const sy of [-1, 1]) add(new THREE.BoxGeometry(2.6, 1.1, 0.3), spk).position.set(sx * (W / 2 - 2), sy * (H / 2 - 1.1), 0); });
   layer(6, 0, (add, L) => {
