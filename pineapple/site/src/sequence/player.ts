@@ -23,7 +23,7 @@ export function loadManifest(): Promise<Manifest> {
   return manifestP;
 }
 
-const MAX_CONCURRENT = 6;
+const MAX_CONCURRENT = 10;
 const FADE_MS = 520;
 export interface HudInfo { shot: Shot; frame: number; real: boolean }
 
@@ -158,7 +158,15 @@ export class SequencePlayer {
   }
   private pump() {
     while (!this.disposed && this.inflight < MAX_CONCURRENT && this.queue.length) {
-      const [key, id, i] = this.queue.shift()!;
+      // nearest-first: whatever is closest to where the visitor is now (a little ahead preferred) loads next
+      const cur = this.locate(Math.max(0, this.frame));
+      let best = 0, bestScore = Infinity;
+      for (let n = 0; n < this.queue.length; n++) {
+        const [, qid, qi] = this.queue[n];
+        const score = qid === cur.s.id ? Math.abs(qi - cur.i) - (qi >= cur.i ? 0.5 : 0) : 1000 + qi;
+        if (score < bestScore) { bestScore = score; best = n; if (score < 0.5) break; }
+      }
+      const [key, id, i] = this.queue.splice(best, 1)[0];
       const im = new Image();
       im.decoding = 'async';
       this.inflight++;

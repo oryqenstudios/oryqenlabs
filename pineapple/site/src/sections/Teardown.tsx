@@ -29,14 +29,14 @@ export function Teardown({ source, copy = TEARDOWN_COPY }: { source?: ExploreSou
   const [sel, setSel] = useState(-1);
   const [q, setQ] = useState(0);
   const qRef = useRef(0), raf = useRef(0), stage = useRef<HTMLDivElement>(null);
-  const [size, setSize] = useState({ w: 16, h: 9 });
+  const [size, setSize] = useState({ w: 16, h: 9, ox: 0, oy: 0 }); // the photo's box: covers the full-screen stage
   const layers = source?.layers ?? DEVICES[device].layers, data = source ?? TEARDOWN[device]!, dir = source?.dir ?? `teardown/${device}`, subject = source?.name ?? DEVICES[device].name;
   const [shown, setShown] = useState(-1); // the layer the camera is on (lags `sel` while it moves between layers)
   const [pan, setPan] = useState(0); // 0 = top of the part, 1 = bottom; the camera drifts down it, or follows the pointer
   const steer = useRef(0); // until this time the pointer steers the pan instead of the drift
 
   useEffect(() => {
-    const el = stage.current!; const ro = new ResizeObserver(() => setSize({ w: el.clientWidth, h: el.clientHeight }));
+    const el = stage.current!; const ro = new ResizeObserver(() => { const W = el.clientWidth, H = el.clientHeight, w = Math.max(W, (H * 16) / 9), h = (w * 9) / 16; setSize({ w, h, ox: (W - w) / 2, oy: (H - h) / 2 }); });
     ro.observe(el); return () => ro.disconnect();
   }, []);
   useEffect(() => () => cancelAnimationFrame(raf.current), []);
@@ -99,7 +99,7 @@ export function Teardown({ source, copy = TEARDOWN_COPY }: { source?: ExploreSou
     const cyT = y0 + (y1 - y0) * (seen >= 1 ? 0.5 : seen / 2 + (1 - seen) * pan);
     s = Math.exp(Math.log(sT) * g); cx = 0.5 + ((x0 + x1) / 2 - 0.5) * g; cy = 0.5 + (cyT - 0.5) * g;
   }
-  const tx = size.w * 0.5 - s * cx * size.w, ty = size.h * 0.5 - s * cy * size.h;
+  const tx = size.ox + size.w * 0.5 - s * cx * size.w, ty = size.oy + size.h * 0.5 - s * cy * size.h;
   const toScreen = (x: number, y: number) => ({ left: tx + s * x * size.w, top: ty + s * y * size.h });
   const arrived = sm(0.8, 1, q);
   const L = sel >= 0 ? layers[sel] : null;
@@ -120,10 +120,11 @@ export function Teardown({ source, copy = TEARDOWN_COPY }: { source?: ExploreSou
           </div>}
         </div>
 
-        <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
-          <div ref={stage} className="relative aspect-[16/9] w-full overflow-hidden rounded-[22px] border border-ink-line bg-[#050403]"
+        <div className="relative grid gap-5">
+          <div ref={stage} className="relative left-1/2 h-[100svh] w-screen -translate-x-1/2 overflow-hidden bg-[#050403]"
             onPointerMove={e => { if (e.pointerType === 'mouse' || e.buttons) steerTo(e.clientY); }} style={{ touchAction: arrivedNow ? 'pan-x' : undefined }}>
-            <div className="absolute left-0 top-0 h-full w-full origin-top-left will-change-transform" style={{ transform: `translate(${tx}px, ${ty}px) scale(${s})` }}>
+            {/* laid out at the zoomed size (not scaled), so the photos are drawn sharp at every zoom */}
+            <div className="absolute" style={{ left: tx, top: ty, width: size.w * s, height: size.h * s }}>
               <img src={img(dir)} alt={source ? `${subject}, photographed.` : `${subject}, exploded into its ${layers.length} layers.`} className="absolute inset-0 h-full w-full object-cover" decoding="async" />
               {layers.map((l, i) => {
                 const r = data.parts[l.id]?.rect; if (!r) return null;
@@ -177,7 +178,7 @@ export function Teardown({ source, copy = TEARDOWN_COPY }: { source?: ExploreSou
           </div>
 
           {/* the details */}
-          <aside className="grid content-start gap-3 rounded-[22px] border border-ink-line bg-ink-2/70 p-5 backdrop-blur-md" aria-live="polite">
+          <aside className="grid content-start gap-3 rounded-[22px] border border-ink-line bg-ink-2/70 p-5 backdrop-blur-md lg:absolute lg:right-0 lg:top-6 lg:z-10 lg:max-h-[calc(100svh-48px)] lg:w-[360px] lg:overflow-auto" aria-live="polite">
             {L ? (
               <>
                 <span className="label">{copy.unit === 'layers' ? 'Layer' : 'Part'} {pad(sel + 1, 2)} of {layers.length}</span>
