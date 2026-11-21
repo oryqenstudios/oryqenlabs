@@ -136,7 +136,7 @@ function RevealStage({ p }: { p: number }) {
             className="group absolute grid h-11 w-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full transition-opacity duration-500 max-md:hidden"
             style={{ left: x, top: y, opacity: hint, pointerEvents: hint ? 'auto' : 'none' }} aria-label={`Zoom in on the ${z.label}`}>
             <span className="absolute inset-[6px] animate-ping rounded-full border-2 border-cream/70 [animation-duration:2.4s]" />
-            <span className="relative grid h-[28px] w-[28px] place-items-center rounded-full border border-cream bg-ink/55 text-[17px] leading-none text-cream shadow-[0_0_0_4px_rgba(243,241,230,.12),0_4px_18px_rgba(10,11,8,.6)] backdrop-blur-md">+</span>
+            <span className="relative grid h-[28px] w-[28px] place-items-center rounded-full border border-cream bg-ink/55 text-[17px] leading-none text-cream shadow-[0_0_0_4px_rgba(243,241,230,.12),0_4px_18px_rgba(5,5,5,.6)] backdrop-blur-md">+</span>
             <span className="pointer-events-none absolute left-full top-1/2 ml-1 -translate-y-1/2 whitespace-nowrap rounded-full bg-ink/70 px-2.5 py-1 text-[.74rem] opacity-0 backdrop-blur-sm transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">{z.label}</span>
           </button>
         );

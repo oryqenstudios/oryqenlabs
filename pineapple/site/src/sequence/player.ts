@@ -236,20 +236,20 @@ export class SequencePlayer {
     // tall screens keep `fit` of the width, wide screens `fitH` of the height, instead of cropping the subject
     const { x, y, w: iw, h: ih } = coverRect(w, h, im.naturalWidth, im.naturalHeight, fit, fitH);
     g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
-    if (ih < h - 1 || iw < w - 1) { g.fillStyle = '#0a0b08'; g.fillRect(0, 0, w, h); }
+    if (ih < h - 1 || iw < w - 1) { g.fillStyle = '#050505'; g.fillRect(0, 0, w, h); }
     g.drawImage(im, x, y, iw, ih);
     const e0 = 90 * (window.devicePixelRatio || 1);
     if (ih < h - 1) { // soften the top and bottom edges into the studio black
       const e = Math.min(ih * 0.18, e0);
       for (const [y0, y1] of [[y, y + e], [y + ih, y + ih - e]]) {
-        const gr = g.createLinearGradient(0, y0, 0, y1); gr.addColorStop(0, 'rgba(10,11,8,1)'); gr.addColorStop(1, 'rgba(10,11,8,0)');
+        const gr = g.createLinearGradient(0, y0, 0, y1); gr.addColorStop(0, 'rgba(5,5,5,1)'); gr.addColorStop(1, 'rgba(5,5,5,0)');
         g.fillStyle = gr; g.fillRect(0, Math.min(y0, y1), w, e);
       }
     }
     if (iw < w - 1) { // and the side edges
       const e = Math.min(iw * 0.12, e0);
       for (const [x0, x1] of [[x, x + e], [x + iw, x + iw - e]]) {
-        const gr = g.createLinearGradient(x0, 0, x1, 0); gr.addColorStop(0, 'rgba(10,11,8,1)'); gr.addColorStop(1, 'rgba(10,11,8,0)');
+        const gr = g.createLinearGradient(x0, 0, x1, 0); gr.addColorStop(0, 'rgba(5,5,5,1)'); gr.addColorStop(1, 'rgba(5,5,5,0)');
         g.fillStyle = gr; g.fillRect(Math.min(x0, x1), 0, e, h);
       }
     }

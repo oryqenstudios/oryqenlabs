@@ -2,7 +2,6 @@ import { Component, lazy, Suspense, useEffect, useState, type ReactNode } from '
 import { setQuality } from './three/quality';
 import { Nav } from './components/Nav';
 import { Loader } from './components/Loader';
-import { SpiralBackground } from './components/SpiralBackground';
 import { Hero } from './sections/Hero';
 import { Design, Finish, Camera, Chip, Durability } from './sections/Cinematic';
 import { Reveal } from './sections/Reveal';
@@ -38,7 +37,6 @@ export default function App() {
     <>
       <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-cream focus:px-4 focus:py-2 focus:text-char">Skip to content</a>
       <Loader ready={ready} />
-      <SpiralBackground />
       {live && <StageBoundary><Suspense fallback={null}><Stage /></Suspense></StageBoundary>}
       <Nav />
       <main id="main" tabIndex={-1}>

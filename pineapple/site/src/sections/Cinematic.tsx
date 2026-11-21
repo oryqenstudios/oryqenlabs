@@ -67,7 +67,7 @@ export function Finish() {
               {/* switching finish: a wash of the new colour sweeps out from the phone */}
               <div key={fin} aria-hidden="true" className="finish-wash pointer-events-none absolute inset-0"
                 style={{ background: `radial-gradient(circle at 50% 52%, ${f.accent[1]}cc, ${f.accent[0]}88 30%, transparent 62%)` }} />
-              <div className="pointer-events-none absolute grid max-w-[360px] gap-3 [text-shadow:0_2px_18px_rgba(10,11,8,.6)] max-md:right-[var(--gut-r)]" style={{ left: 'var(--gut-l)', top: 84 }}>
+              <div className="pointer-events-none absolute grid max-w-[360px] gap-3 [text-shadow:0_2px_18px_rgba(5,5,5,.6)] max-md:right-[var(--gut-r)]" style={{ left: 'var(--gut-l)', top: 84 }}>
                 <span className="label">Finish {String(PHONE_FINISHES.indexOf(fin) + 1).padStart(2, '0')} / 05</span>
                 <span key={fin} className="finish-name text-[clamp(2.4rem,5.6vw,4.4rem)] font-bold leading-none tracking-[-.04em]" aria-label={f.name}>
                   {f.name.split(' ').map((w, wi, all) => (

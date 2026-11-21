@@ -64,7 +64,7 @@ function HeroStage({ p }: { p: number }) {
         }}>
         <FrameSequence shots={[1]} progress={s} opts={opts} hud={mine} />
         {/* while the footage is drawn slightly smaller than the screen, its edges melt into the page */}
-        {mine && <div aria-hidden="true" className="pointer-events-none absolute inset-0" style={{ boxShadow: 'inset 0 0 12vmin 3vmin #0a0b08', opacity: clamp((1 - sc) / 0.136, 0, 1) }} />}
+        {mine && <div aria-hidden="true" className="pointer-events-none absolute inset-0" style={{ boxShadow: 'inset 0 0 12vmin 3vmin #050505', opacity: clamp((1 - sc) / 0.136, 0, 1) }} />}
       </div>
     );
   };
@@ -81,8 +81,8 @@ function HeroStage({ p }: { p: number }) {
       <div className="absolute inset-0 isolate">{layer('a', even, finA, optsA)}{layer('b', !even, finB, optsB)}</div>
       <Droplets />
       {/* phones: the phone fills the width, so the title gets a scrim */}
-      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-[52%] md:hidden" style={{ opacity: title, background: 'linear-gradient(180deg, rgba(10,11,8,.9), rgba(10,11,8,.55) 60%, rgba(10,11,8,0))' }} />
-      <div className="pointer-events-none absolute inset-0 grid content-start justify-items-center gap-2 text-center [text-shadow:0_2px_24px_rgba(10,11,8,.55)] md:content-center md:justify-items-start md:text-left"
+      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-[52%] md:hidden" style={{ opacity: title, background: 'linear-gradient(180deg, rgba(5,5,5,.9), rgba(5,5,5,.55) 60%, rgba(5,5,5,0))' }} />
+      <div className="pointer-events-none absolute inset-0 grid content-start justify-items-center gap-2 text-center [text-shadow:0_2px_24px_rgba(5,5,5,.55)] md:content-center md:justify-items-start md:text-left"
         style={{ paddingTop: 'clamp(62px,8.5vh,96px)', paddingLeft: 'var(--gut-l)', paddingRight: 'var(--gut-r)', opacity: title, transform: `translateY(${-(1 - title) * 24}px)`, visibility: title <= 0 ? 'hidden' : undefined }}>
         <LogoButton id="hero-logo" className="pointer-events-auto h-11 w-11" label="PINEAPPLE logo. Click to burst it; press and hold to charge a bigger burst." />
         <p className="label">01 · Crown Pro</p>
@@ -94,9 +94,9 @@ function HeroStage({ p }: { p: number }) {
         <Readouts className="max-md:!top-auto max-md:bottom-[150px]" items={[['Turn', `${Math.round(540 * sm(0.04, SPIN, t))}°`], ['Finish', `${String(seg + 1).padStart(2, '0')} / 05`]]} />
       </div>
       {/* the peak's caption: beside the phone where the title was, or above the chips on phones */}
-      <p aria-hidden="true" className="pointer-events-none absolute top-1/2 m-0 max-w-[30vw] -translate-y-1/2 text-[clamp(1.6rem,3.6vw,3.2rem)] font-bold leading-[1.02] tracking-[-.035em] [text-shadow:0_2px_6px_rgba(10,11,8,.55),0_4px_40px_rgba(10,11,8,.9)] max-md:hidden"
+      <p aria-hidden="true" className="pointer-events-none absolute top-1/2 m-0 max-w-[30vw] -translate-y-1/2 text-[clamp(1.6rem,3.6vw,3.2rem)] font-bold leading-[1.02] tracking-[-.035em] [text-shadow:0_2px_6px_rgba(5,5,5,.55),0_4px_40px_rgba(5,5,5,.9)] max-md:hidden"
         style={{ left: 'var(--gut-l)', opacity: peak }}>This is <span className="font-serif font-normal italic tracking-normal">{name}</span>.</p>
-      <p aria-hidden="true" className="pointer-events-none absolute inset-x-0 m-0 text-center text-[1.6rem] font-bold tracking-[-.03em] [text-shadow:0_2px_6px_rgba(10,11,8,.55),0_4px_40px_rgba(10,11,8,.9)] md:hidden"
+      <p aria-hidden="true" className="pointer-events-none absolute inset-x-0 m-0 text-center text-[1.6rem] font-bold tracking-[-.03em] [text-shadow:0_2px_6px_rgba(5,5,5,.55),0_4px_40px_rgba(5,5,5,.9)] md:hidden"
         style={{ bottom: 'calc(max(18px, env(safe-area-inset-bottom, 0px)) + 108px)', opacity: peak }}>This is <span className="font-serif font-normal italic tracking-normal">{name}</span>.</p>
       <p className="sr-only" aria-live="polite">{`Finish ${seg + 1} of 5: ${name}`}</p>
       <div className="dock-bottom">

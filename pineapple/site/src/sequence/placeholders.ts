@@ -85,7 +85,7 @@ export function tablet2D(g: G, cx: number, cy: number, h: number, fin: FinishKey
   g.restore();
 }
 
-function vignette(g: G, w: number, h: number, base = '#0a0b08') {
+function vignette(g: G, w: number, h: number, base = '#050505') {
   g.fillStyle = base; g.fillRect(0, 0, w, h);
   const v = g.createRadialGradient(w / 2, h * 0.45, 0, w / 2, h * 0.45, Math.max(w, h) * 0.7);
   v.addColorStop(0, 'rgba(40,46,30,.55)'); v.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = v; g.fillRect(0, 0, w, h);
@@ -163,7 +163,7 @@ export const PAINT: Record<number, (g: G, w: number, h: number, t: number, o: Pa
     }
   },
   9(g, w, h, t) {
-    const surf = lerp(h * 0.35, -h * 0.6, ease(t)); g.fillStyle = '#0a0b08'; g.fillRect(0, 0, w, h);
+    const surf = lerp(h * 0.35, -h * 0.6, ease(t)); g.fillStyle = '#050505'; g.fillRect(0, 0, w, h);
     const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, '#0e2a33'); gr.addColorStop(1, '#04090b'); g.fillStyle = gr; g.fillRect(0, Math.max(0, surf), w, h);
     g.strokeStyle = 'rgba(160,230,255,.4)'; g.lineWidth = 2; g.beginPath(); for (let x = 0; x <= w; x += 12) g.lineTo(x, surf + Math.sin(x * 0.02 + t * 20) * 4); g.stroke();
     const py = lerp(h * 0.12, h * 0.58, ease(t)); phone2D(g, w * 0.5, py, h * 0.5, 'ripen', { ang: Math.PI, tilt: 0.1 + t * 0.1 });

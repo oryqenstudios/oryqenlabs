@@ -51,7 +51,7 @@ function Studio() {
         <Lightformer form="rect" intensity={1.8} color="#dfffcf" position={[-46, -4, -30]} scale={[10, 34, 1]} target={[0, 0, 0]} />
         <Lightformer form="rect" intensity={1.2} color="#ffe2a8" position={[0, 10, -48]} scale={[30, 30, 1]} target={[0, 0, 0]} />
       </Environment>
-      <hemisphereLight args={['#4a5240', '#0a0b08', 0.6]} />
+      <hemisphereLight args={['#4a5240', '#050505', 0.6]} />
       <directionalLight position={[-8, 12, 14]} intensity={2} />
       <directionalLight position={[9, 5, -12]} intensity={1.6} color="#ffe2b0" />
     </>

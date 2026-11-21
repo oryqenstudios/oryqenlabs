@@ -5,7 +5,6 @@ import { FrameSequence } from '../sequence/FrameSequence';
 import { Readouts } from '../components/Readouts';
 import { placeSpatial, setSpatialMode, startSpatial, stopSpatial } from '../lib/spatial';
 import { sm } from '../lib/math';
-import { reducedMotion } from '../lib/tokens';
 
 const BASE = import.meta.env.BASE_URL;
 const SPECS = [
@@ -40,20 +39,14 @@ export function Sound() {
   );
 }
 
-/** Shot 19 dives through the grille into the cut-away speaker; then shot 20, the bass in action, keeps playing on a loop. */
+/** Shot 19 dives through the grille into the cut-away speaker; then shot 20, the bass in action, plays on with the scroll. */
 const INSIDE = 0.55;
 function SpeakerStage({ p }: { p: number }) {
   const inside = p >= INSIDE;
-  const [t, setT] = useState(0);
-  useEffect(() => {
-    if (!inside || reducedMotion()) return;
-    let id = 0; const t0 = performance.now();
-    const tick = () => { setT((performance.now() - t0) / 1000); id = requestAnimationFrame(tick); };
-    id = requestAnimationFrame(tick); return () => cancelAnimationFrame(id);
-  }, [inside]);
-  const loop = 1 - Math.abs(((t / 4.2) % 2) - 1); // forward, then back: the diaphragm keeps pumping
-  const seq = inside ? 0.5 + 0.5 * loop : (p / INSIDE) * 0.5;
-  const excursion = inside ? (0.65 * Math.abs(Math.sin(t * Math.PI * 1.6))).toFixed(2) : '0.00';
+  // the bass plays forward with the scroll, once: the air only ever leaves the speaker
+  const play = Math.min(1, Math.max(0, (p - INSIDE) / (0.95 - INSIDE)));
+  const seq = inside ? 0.5 + 0.5 * play : (p / INSIDE) * 0.5;
+  const excursion = inside ? (0.65 * Math.abs(Math.sin(play * Math.PI * 8))).toFixed(2) : '0.00';
   const caption = sm(INSIDE, INSIDE + 0.08, p);
   return (
     <>
