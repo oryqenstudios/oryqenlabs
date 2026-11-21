@@ -236,3 +236,4 @@ Request IDs: `speaker-dive`, `speaker-bass`, `speaker-cutaway` in the session lo
 ## Breakdown textures
 
 - `bd-board.jpg`, `bd-battery.jpg`, `bd-cooling.jpg`, `bd-back.jpg`: top-down studio photos (Qwen Image 3 text-to-image) used as textures on the hands-on 3D breakdown, cut out to `site/public/frames/parts/`. The screen texture is cropped from the front studio shot.
+- `bd-small.jpg`, `bd-coil.jpg`: top-down photos for the small-parts and charging-coil layers; `bd-camera.jpg` was not used (it showed a different lens layout). Slate Pro's display layer uses its screen cropped from `slate-front.jpg`.

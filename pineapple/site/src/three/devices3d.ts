@@ -7,7 +7,7 @@ import { PHONE, TABLET, type Layer, type DeviceKey } from '../data/devices';
 import { FINISHES, ZEST, type FinishKey, type ZestKey } from '../data/finishes';
 import { rng, lerp, sm } from '../lib/math';
 import { rr, hexShape, ext, normUV, cyl } from './geometry';
-import { drawScales, rindTexture, wallpaper, labelTexture, canvasTexture, photoTexture, TEX_LO, TEX_HI } from './textures';
+import { drawScales, rindTexture, labelTexture, canvasTexture, photoTexture, TEX_LO, TEX_HI } from './textures';
 
 export type AnyFinish = FinishKey | ZestKey;
 
@@ -91,6 +91,7 @@ export function buildPhone(): DeviceModel {
   const rind = rindTexture();
   const screen = photoTexture('screen');
   const boardTex = photoTexture('board'), batteryTex = photoTexture('battery'), coolTex = photoTexture('cooling');
+  const smallTex = photoTexture('small'), coilTex = photoTexture('coil');
   const photo = (map: THREE.Texture, extra: Partial<THREE.MeshStandardMaterialParameters> = {}) => std({ map, color: 0xffffff, transparent: true, alphaTest: 0.4, roughness: 0.5, ...extra });
 
   // brushed titanium: anisotropic sheen along the rails, rind micro-texture as bump
@@ -161,23 +162,18 @@ export function buildPhone(): DeviceModel {
     const fl = add(new THREE.CircleGeometry(0.12, 24), std({ color: 0xfff2c8, emissive: 0x5a4a20, roughness: 0.3 })); fl.rotation.y = Math.PI; fl.position.set(CX + 0.62, CY + 0.85, -0.1);
     const tof = add(new THREE.CircleGeometry(0.1, 24), std({ color: 0x050505, roughness: 0.2 })); tof.rotation.y = Math.PI; tof.position.set(CX + 0.62, CY - 0.95, -0.1);
   });
-  // 8 small parts
+  // 8 small parts: the earpiece and mics, and the photographed bottom row (speakers, haptic motor, mics, USB-C)
   layer(7, -0.1, add => {
     const spk = std({ color: 0x26282a, roughness: 0.7 });
-    for (const x of [-1.75, 1.75]) add(new THREE.BoxGeometry(1.5, 0.55, 0.3), spk).position.set(x, -H / 2 + 0.95, 0);
     add(new THREE.BoxGeometry(1.3, 0.26, 0.2), spk).position.set(0, H / 2 - 0.36, 0);
-    add(new THREE.BoxGeometry(1.75, 0.62, 0.36), std({ color: 0x8f918b, metalness: 0.85, roughness: 0.3 })).position.set(1.45, -H / 2 + 2.05, 0);
-    add(ext(rr(1.05, 0.36, 0.17), 0.34, 0.02), std({ color: 0xc8c9c4, metalness: 1, roughness: 0.25 })).position.set(0, -H / 2 + 0.32, 0);
     const mic = std({ color: 0x0f0f0f });
-    for (const [x, y] of [[-0.9, -H / 2 + 0.25], [0.9, -H / 2 + 0.25], [1.1, H / 2 - 0.3], [-2.6, H / 2 - 0.5]]) add(cyl(0.07, 0.12, 12), mic).position.set(x, y, 0);
+    for (const [x, y] of [[1.1, H / 2 - 0.3], [-2.6, H / 2 - 0.5]]) add(cyl(0.07, 0.12, 12), mic).position.set(x, y, 0);
+    const row = add(new THREE.PlaneGeometry(6.2, 6.2 / 5.48), photo(smallTex, { side: THREE.DoubleSide, roughness: 0.45, metalness: 0.3 })); row.position.set(0, -H / 2 + 1.1, 0);
   });
-  // 9 wireless coil + magnet ring
+  // 9 wireless coil + magnet ring: photographed, its ring centred where the coil sits
   layer(8, -0.3, add => {
-    const cu = std({ color: 0xc77b3a, metalness: 1, roughness: 0.35 }), mag = std({ color: 0x55585c, metalness: 0.85, roughness: 0.35 });
-    for (let r = 0.72; r < 1.9; r += 0.15) add(new THREE.TorusGeometry(r, 0.045, 8, 72), cu).position.y = -0.6;
-    add(new THREE.TorusGeometry(2.2, 0.11, 10, 96), mag).position.y = -0.6;
-    add(new THREE.BoxGeometry(0.5, 0.32, 0.12), mag).position.set(0, -3.15, 0);
-    add(new THREE.CircleGeometry(2.05, 64), std({ color: 0x161616, roughness: 0.9, side: THREE.DoubleSide })).position.set(0, -0.6, -0.06);
+    const w = 4.6, h = w / 0.752;
+    const coil = add(new THREE.PlaneGeometry(w, h), photo(coilTex, { side: THREE.DoubleSide, roughness: 0.35, metalness: 0.6 })); coil.position.set(0, -0.6 - (0.5 - 0.376) * h, 0);
   });
   // 10 etched back glass
   layer(9, -0.37, add => {
@@ -229,7 +225,7 @@ export function buildTablet(): DeviceModel {
   const neutral = canvasTexture(drawScales(TEX_LO, 'tablet', 'neutral'));
   const ripenTex = canvasTexture(drawScales(TEX_LO, 'tablet', 'ripen'));
   const bumpTex = canvasTexture(drawScales(TEX_LO, 'tablet', 'ripen', true), false);
-  const screen = wallpaper(820, 1072);
+  const screen = photoTexture('slate-screen'); // the real screen, from the studio photo
   const cell = labelTexture(256, 512, '#1a1b18', [['21 Wh', 34, '#f0b53a', 240], ['CELL A · B', 14, '#9c9d8d', 270, 500]]);
   const chipTex = labelTexture(256, 256, '#2a2b27', [['NECTAR', 30, '#d9c48a', 118, 700], ['N7 MAX', 22, '#9c9d8d', 152, 500]]);
 
