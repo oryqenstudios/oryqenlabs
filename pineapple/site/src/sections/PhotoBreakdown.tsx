@@ -1,0 +1,100 @@
+import { useEffect, useRef, useState } from 'react';
+import { DEVICES } from '../data/devices';
+import { TEARDOWN } from '../data/teardown';
+import { pad } from '../lib/math';
+
+const BASE = import.meta.env.BASE_URL;
+
+/**
+ * The hands-on breakdown, photographed. Every layer of the exploded photo is its own cut-out, laid exactly where it
+ * sits in the photo: drag any layer out (it lifts, casts a shadow and follows your hand), let go and it glides back.
+ * Click a layer to read its specs.
+ */
+export function PhotoBreakdown() {
+  const layers = DEVICES.phone.layers, parts = TEARDOWN.phone!.parts;
+  const stage = useRef<HTMLDivElement>(null);
+  const [box, setBox] = useState({ x: 0, y: 0, w: 16, h: 9 });
+  const [drag, setDrag] = useState<{ i: number; dx: number; dy: number; moved: boolean } | null>(null);
+  const [back, setBack] = useState(-1); // the layer gliding home
+  const [hover, setHover] = useState(-1);
+  const [sel, setSel] = useState(-1);
+  const start = useRef({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const el = stage.current!;
+    const ro = new ResizeObserver(() => {
+      const W = el.clientWidth, H = el.clientHeight, w = Math.min(W * 0.96, (H * 0.9 * 16) / 9), h = (w * 9) / 16;
+      setBox({ x: (W - w) / 2, y: (H - h) / 2, w, h });
+    });
+    ro.observe(el); return () => ro.disconnect();
+  }, []);
+  useEffect(() => {
+    const k = (e: KeyboardEvent) => { if (e.key === 'Escape') setSel(-1); };
+    addEventListener('keydown', k); return () => removeEventListener('keydown', k);
+  }, []);
+
+  const down = (i: number) => (e: React.PointerEvent) => {
+    (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
+    start.current = { x: e.clientX, y: e.clientY };
+    setDrag({ i, dx: 0, dy: 0, moved: false }); setBack(-1);
+  };
+  const move = (e: React.PointerEvent) => {
+    if (!drag) return;
+    const dx = e.clientX - start.current.x, dy = e.clientY - start.current.y;
+    setDrag({ ...drag, dx, dy, moved: drag.moved || Math.hypot(dx, dy) > 6 });
+  };
+  const up = () => {
+    if (!drag) return;
+    if (!drag.moved) setSel(drag.i); else setBack(drag.i);
+    setDrag(null);
+  };
+  const L = sel >= 0 ? layers[sel] : null;
+
+  return (
+    <section id="breakdown" aria-label="Take it apart" className="relative overflow-x-clip">
+      <div className="wrap grid gap-2 pt-[clamp(48px,8vh,96px)]">
+        <span className="label">05 · Take it apart · photographed</span>
+        <h2 className="m-0 text-[clamp(2rem,4.6vw,3.6rem)] font-bold leading-[.98] tracking-[-.04em]">Pull it apart <span className="grad">yourself.</span></h2>
+        <p className="m-0 max-w-[560px] text-mute">Every layer is a real photograph. Drag any layer out; let go and it glides home. Click a layer to read it.</p>
+      </div>
+      <div ref={stage} className="relative h-[100svh] w-full touch-none select-none bg-[#050505]" onPointerMove={move} onPointerUp={up} onPointerCancel={up}>
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(60% 45% at 50% 70%, rgba(240,181,58,.07), transparent 70%)' }} />
+        {layers.map((l, i) => {
+          const r = parts[l.id]?.rect; if (!r) return null;
+          const held = drag?.i === i, lift = held && drag!.moved ? 1 : hover === i ? 0.35 : 0;
+          const t = held ? `translate(${drag!.dx}px, ${drag!.dy}px) scale(${1 + 0.05 * lift})` : `translateY(${-6 * lift}px) scale(${1 + 0.05 * lift})`;
+          return (
+            <img key={l.id} src={`${BASE}frames/breakdown/${l.id}.webp`} alt={l.name} draggable={false} decoding="async"
+              onPointerDown={down(i)} onPointerEnter={() => setHover(i)} onPointerLeave={() => setHover(h => (h === i ? -1 : h))}
+              className="absolute max-w-none cursor-grab active:cursor-grabbing"
+              style={{
+                left: box.x + r[0] * box.w, top: box.y + r[1] * box.h, width: (r[2] - r[0]) * box.w, height: (r[3] - r[1]) * box.h,
+                zIndex: held ? 40 : sel === i ? 30 : 20 - i, transform: t,
+                transition: held ? 'filter .3s' : back === i ? 'transform .8s cubic-bezier(.22,1,.36,1), filter .5s' : 'transform .35s cubic-bezier(.22,1,.36,1), filter .35s',
+                filter: lift > 0 ? `drop-shadow(0 ${18 * lift}px ${28 * lift}px rgba(0,0,0,.7)) brightness(${1 + 0.08 * lift})` : sel === i ? 'brightness(1.12)' : 'none',
+              }} />
+          );
+        })}
+        {hover >= 0 && !drag && (() => { const r = parts[layers[hover].id].rect; return (
+          <span className="pointer-events-none absolute z-50 -translate-x-1/2 whitespace-nowrap rounded-full border border-ink-line bg-ink/80 px-3 py-1 text-[.78rem] backdrop-blur-md"
+            style={{ left: box.x + ((r[0] + r[2]) / 2) * box.w, top: box.y + r[3] * box.h - 28 }}>{pad(hover + 1, 2)} · {layers[hover].name}</span>); })()}
+        <p className="pointer-events-none absolute inset-x-0 bottom-[max(18px,env(safe-area-inset-bottom,0px))] z-50 m-0 text-center font-mono text-[.7rem] uppercase tracking-[.14em] text-cream/70">Drag any layer out · click to read it</p>
+        {L && (
+          <aside className="absolute right-[var(--gut-r)] top-6 z-50 grid max-h-[calc(100svh-48px)] w-[min(360px,calc(100%-32px))] content-start gap-3 overflow-auto rounded-[22px] border border-ink-line bg-ink-2/80 p-5 backdrop-blur-xl" aria-live="polite">
+            <div className="flex items-start justify-between gap-3">
+              <span className="label">Layer {pad(sel + 1, 2)} of {layers.length} · {L.mm}</span>
+              <button type="button" className="chip !px-2.5 !py-0.5" onClick={() => setSel(-1)} aria-label="Close">×</button>
+            </div>
+            <h3 className="m-0 text-[1.6rem] font-bold leading-tight tracking-[-.03em]">{L.name}{L.sub && <span className="block text-[1rem] font-semibold text-mute">{L.sub}</span>}</h3>
+            <p className="m-0 text-mute">{L.story}</p>
+            <ul className="m-0 grid list-none gap-2 p-0 text-[.9rem]">{L.specs.map(sp => <li key={sp} className="border-t border-ink-line pt-2">{sp}</li>)}</ul>
+            <div className="flex justify-between gap-2">
+              <button type="button" className="chip" onClick={() => setSel((sel - 1 + layers.length) % layers.length)}>← Previous</button>
+              <button type="button" className="chip" onClick={() => setSel((sel + 1) % layers.length)}>Next →</button>
+            </div>
+          </aside>
+        )}
+      </div>
+    </section>
+  );
+}

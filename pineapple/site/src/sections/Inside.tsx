@@ -3,14 +3,14 @@ import { ScrubSection } from '../components/ScrubSection';
 import { SectionIntro } from '../components/SectionIntro';
 import { FrameSequence } from '../sequence/FrameSequence';
 import { Readouts } from '../components/Readouts';
-import { Breakdown } from './Breakdown';
+import { PhotoBreakdown } from './PhotoBreakdown';
 import { sm } from '../lib/math';
 import { reducedMotion } from '../lib/tokens';
 
 /**
  * 05 · Inside. Shot 4: the phone separates into its ten layers. Shot 5: they come back together and the phone turns
  * to face you, screen on. Then it is yours to turn: shots 15 and 16 are a full turn (front to back, back to front),
- * scrubbed by dragging. Below, the hands-on breakdown: pull it apart yourself.
+ * scrubbed by dragging. Below, the photographed breakdown: drag each real layer out yourself.
  */
 const EXPLODE = 0.36, HOLD = 0.44, ASSEMBLED = 0.8;
 export function Inside() {
@@ -24,7 +24,7 @@ export function Inside() {
           return <InsideStage seq={seq} live={p >= ASSEMBLED + 0.01} layers={layers} />;
         }}
       </ScrubSection>
-      <Breakdown />
+      <PhotoBreakdown />
     </section>
   );
 }

@@ -247,3 +247,7 @@ Request IDs: `speaker-dive`, `speaker-bass`, `speaker-cutaway` in the session lo
 
 Second 4K batch: `4k-turn-*` (finish turntables), `4k-water-v2`, `4k-slate-edge-v2`, `4k-sound-bass-v2`, `4k-speaker-dive`, `4k-speaker-bass-v2`, `4k-shot8`. Every footage scene on the site is now sourced from 4K.
 - `chip-board-<part>.jpg` re-made from the 4K board (`inputs/board4-*.jpg`) for sharper, cleaner close-ups.
+
+## Photographed breakdown
+
+`iso-<layer>.png`: each layer of the exploded photo isolated on black at its exact position (Qwen edit of `inputs/td-phone-*.jpg`), cut out to `site/public/frames/breakdown/<layer>.webp` for the drag-out breakdown.
