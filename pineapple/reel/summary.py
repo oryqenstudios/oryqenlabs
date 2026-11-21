@@ -12,7 +12,7 @@ clips = json.load(open(f'{SRC}/clips.json'))
 # under each clip: what you are watching someone do (keep in step with highlights.cjs)
 DETAILS = ['4K splash footage · one continuous scroll', 'A beam of light reveals it · tap a hotspot to zoom', 'Tap a finish · the phone repaints live',
            'Real photographed layers · drag any one out', 'Drag the slider · ultra-wide to 25× zoom', 'Macro-photographed board · tap a part for specs',
-           'Scroll inside the speaker · watch the bass move', 'IP68 · 6 m for 30 minutes', 'Lift the Quill · draw on the screen', 'Three models · five finishes']
+           'Scroll inside the speaker · watch the bass move', 'IP68 · 6 m for 30 minutes', 'Lift the Quill · draw on the screen', 'Three models · every finish, photographed']
 ease = lambda t: 1 - (1 - max(0, min(1, t))) ** 3
 FG_W, FG_H = W, round(W * 9 / 16); FG_Y = (H - FG_H) // 2 + 60
 def vignette():
@@ -66,7 +66,7 @@ def card(job):
         a = ease((i - 36) / 14); d.text((W // 2, 1200), 'A concept website', font=F('Inter-Regular.otf', 40), fill=tuple(int(c * a + 5 * (1 - a)) for c in MUTE), anchor='mm')
     else:
         a = ease(i / 16); d.text((W // 2, 880 + 40 * (1 - a)), 'pineappleconcept.com', font=F('InterDisplay-Bold.otf', 84), fill=tuple(int(c * a + 5 * (1 - a)) for c in GOLD), anchor='mm')
-        for k, line in enumerate(['4K AI footage', 'Every part photographed', 'Built to be touched']):
+        for k, line in enumerate(['4K cinematic footage', 'Every part, up close', 'Built to be touched']):
             a = ease((i - 14 - 6 * k) / 12); d.text((W // 2, 1010 + 62 * k + 20 * (1 - a)), line, font=F('Inter-Medium.otf', 44), fill=tuple(int(c * a + 5 * (1 - a)) for c in CREAM), anchor='mm')
     p = f'{TMP}/{kind}_{i:05d}.jpg'; im.save(p, quality=94); return p
 def transition(job):
