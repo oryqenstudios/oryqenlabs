@@ -46,7 +46,8 @@ export class SequencePlayer {
   private imgs: Map<string, (HTMLImageElement | null)[]> = new Map();
   /** Per-finish shots: the variant shown now, and the one it is fading from. */
   private variant = new Map<number, string>();
-  private fade: { id: number; from: string; t0: number } | null = null;
+  /** Per shot: the finish being faded away from (a two-shot turntable switches both shots at once). */
+  private fades = new Map<number, { from: string; t0: number }>();
   private fadeRaf = 0;
   private manifest: Manifest | null = null;
   private frame = -1;
@@ -96,8 +97,9 @@ export class SequencePlayer {
       if (now === undefined || now === was) continue;
       this.variant.set(s.id, now);
       // switching again mid-fade: drop the frames of the finish two choices back
-      if (this.fade?.id === s.id && this.fade.from !== `${s.id}/${now}`) this.imgs.delete(this.fade.from);
-      if (was !== undefined) this.fade = { id: s.id, from: `${s.id}/${was}`, t0: 0 };
+      const prev = this.fades.get(s.id);
+      if (prev && prev.from !== `${s.id}/${now}`) this.imgs.delete(prev.from);
+      if (was !== undefined) this.fades.set(s.id, { from: `${s.id}/${was}`, t0: 0 });
       if (this.started) {
         this.queue = this.queue.filter(([k]) => !was || k !== `${s.id}/${was}`); // stop loading the old finish
         const { s: cur, i } = this.locate(Math.max(0, this.frame));
@@ -185,10 +187,11 @@ export class SequencePlayer {
     const s = this.shots[this.shots.length - 1];
     return { s, i: s.frames - 1 };
   }
-  private nearest(key: string, i: number) {
+  /** The loaded frame closest to `i`, at most `within` frames away. */
+  private nearest(key: string, i: number, within = Infinity) {
     const arr = this.imgs.get(key);
     if (!arr) return null;
-    for (let d = 0; d < arr.length; d++) { const a = arr[i - d], b = arr[i + d]; if (a) return a; if (b) return b; }
+    for (let d = 0; d < Math.min(arr.length, within + 1); d++) { const a = arr[i - d], b = arr[i + d]; if (a) return a; if (b) return b; }
     return null;
   }
   private resize() {
@@ -201,17 +204,22 @@ export class SequencePlayer {
     const { g } = this, w = this.canvas.width, h = this.canvas.height;
     if (!w || this.disposed) return;
     const { s, i } = this.locate(Math.max(0, this.frame));
-    let im = s.id === 0 ? null : this.nearest(this.key(s), i);
-    // switching finish: keep the old frames on screen until the new ones arrive, then cross-fade
-    const fade = this.fade?.id === s.id ? this.fade : null;
-    const old = fade ? this.nearest(fade.from, i) : null;
+    // Only frames of the same angle are ever laid over each other. While the frame for this spot is still loading the
+    // nearest one stands in, on its own: blending it with a neighbour several frames away would draw two phones.
+    const key = this.key(s), arr = s.id === 0 ? undefined : this.imgs.get(key);
+    let im = s.id === 0 ? null : this.nearest(key, i);
+    // switching finish: keep the old frames on screen until the new finish has this angle, then cross-fade
+    const fade = s.id !== 0 ? this.fades.get(s.id) ?? null : null;
+    const old = fade ? this.nearest(fade.from, i, 1) : null;
     let mix = 1;
-    if (fade && old) {
-      if (!im) { im = old; mix = 1; } else {
-        fade.t0 ||= performance.now();
-        mix = Math.min(1, (performance.now() - fade.t0) / FADE_MS);
+    if (fade) {
+      const close = this.nearest(key, i, 1);
+      if (!close) im = old ?? im ?? this.nearest(fade.from, i);
+      else {
+        im = close;
+        if (old) { fade.t0 ||= performance.now(); mix = Math.min(1, (performance.now() - fade.t0) / FADE_MS); }
         if (mix < 1) { cancelAnimationFrame(this.fadeRaf); this.fadeRaf = requestAnimationFrame(() => this.draw()); }
-        else { this.imgs.delete(fade.from); this.fade = null; }
+        else { this.imgs.delete(fade.from); this.fades.delete(s.id); }
       }
     }
     const real = !!im || (s.id === 0 && this.isReady(s));
@@ -224,8 +232,8 @@ export class SequencePlayer {
       if (old && mix < 1 && old !== im) { this.cover(old, s.fit, s.fitH); g.globalAlpha = mix * mix * (3 - 2 * mix); this.cover(im, s.fit, s.fitH); g.globalAlpha = 1; }
       else {
         this.cover(im, s.fit, s.fitH);
-        // between frames: blend in the next one by how far we are towards it
-        const nx = this.frac > 0.02 && i + 1 < s.frames ? this.imgs.get(this.key(s))?.[i + 1] : null;
+        // between frames: blend in the next one by how far we are towards it (only over the exact frame, see above)
+        const nx = this.frac > 0.02 && i + 1 < s.frames && arr?.[i] === im ? arr?.[i + 1] : null;
         if (nx) { g.globalAlpha = this.frac; this.cover(nx, s.fit, s.fitH); g.globalAlpha = 1; }
       }
     }

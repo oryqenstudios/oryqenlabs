@@ -76,7 +76,14 @@ node scripts/ingest.mjs 1 ~/Downloads/juice-drop.mp4               # shots 1–1
 node scripts/ingest.mjs 3 orbit.mp4 --from 0.5 --to 7.5             # use only part of a clip
 node scripts/ingest.mjs 0 master.png --finish ripen                 # master stills (shot 0)
 node scripts/ingest.mjs 0 slate-back.png --finish rind --device tablet
+node scripts/ingest.mjs 16 turn-b-green.mp4 --variant green          # one finish's take of a per-finish shot
+python3 scripts/align-turntable.py                                    # after any turntable take (shots 15/16)
 ```
+
+The turntable (shots 15 and 16) has one AI take per finish, and the takes turn at different speeds.
+`align-turntable.py` re-orders the other finishes' frames to follow Ripen's turn, so frame N is the same angle in every
+finish and switching finish mid-turn never jumps or overlays two angles. Ingest writes a take's own timing, so run it
+again after re-ingesting one.
 
 Commit and push: the Pages workflow publishes it. Frames are committed to the repo (Pages serves up to 1 GB; a shot is
 roughly 10–25 MB). The player loads every 8th frame first, then fills in, and always draws the nearest loaded frame.
