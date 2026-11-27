@@ -2,6 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import { DEVICES } from '../data/devices';
 import { TEARDOWN } from '../data/teardown';
 import { pad } from '../lib/math';
+import { isTouch } from '../lib/tokens';
+
+/** On touch screens the stage fills the screen, so a swipe must still scroll the page: a layer is picked up by holding
+ *  it still for a moment, and only then does the page stop scrolling under the finger. */
+const TOUCH = isTouch(), HOLD_MS = 260;
 
 const BASE = import.meta.env.BASE_URL;
 
@@ -63,18 +68,39 @@ export function PhotoBreakdown() {
     addEventListener('keydown', k); return () => removeEventListener('keydown', k);
   }, []);
 
+  const hold = useRef<{ i: number; x: number; y: number; timer: number } | null>(null);
+  const holding = useRef(false); // a layer is in hand: the page must not scroll
+  useEffect(() => {
+    const el = stage.current!, block = (e: TouchEvent) => { if (holding.current) e.preventDefault(); };
+    el.addEventListener('touchmove', block, { passive: false });
+    return () => el.removeEventListener('touchmove', block);
+  }, []);
+
   const down = (e: React.PointerEvent) => {
     const i = hit(e.clientX, e.clientY); if (i < 0) return;
+    if (e.pointerType === 'touch') {
+      const x = e.clientX, y = e.clientY;
+      hold.current = { i, x, y, timer: window.setTimeout(() => {
+        hold.current = null; holding.current = true; start.current = { x, y };
+        setDrag({ i, dx: 0, dy: 0, moved: true }); setBack(-1); navigator.vibrate?.(8);
+      }, HOLD_MS) };
+      return;
+    }
     (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
     start.current = { x: e.clientX, y: e.clientY };
     setDrag({ i, dx: 0, dy: 0, moved: false }); setBack(-1);
   };
   const move = (e: React.PointerEvent) => {
-    if (!drag) { const i = hit(e.clientX, e.clientY); if (i !== hover) setHover(i); return; }
+    const h = hold.current; // moving before the hold completes is a scroll or a swipe, not a pick-up
+    if (h && Math.hypot(e.clientX - h.x, e.clientY - h.y) > 8) { clearTimeout(h.timer); hold.current = null; }
+    if (!drag) { if (e.pointerType === 'mouse') { const i = hit(e.clientX, e.clientY); if (i !== hover) setHover(i); } return; }
     const dx = e.clientX - start.current.x, dy = e.clientY - start.current.y;
     setDrag({ ...drag, dx, dy, moved: drag.moved || Math.hypot(dx, dy) > 6 });
   };
-  const up = () => {
+  const up = (e: React.PointerEvent) => {
+    const h = hold.current;
+    if (h) { clearTimeout(h.timer); hold.current = null; if (e.type === 'pointerup') setSel(h.i); return; } // a quick tap reads it
+    holding.current = false;
     if (!drag) return;
     if (!drag.moved) setSel(drag.i); else setBack(drag.i);
     setDrag(null);
@@ -86,10 +112,10 @@ export function PhotoBreakdown() {
       <div className="wrap grid gap-2 pt-[clamp(48px,8vh,96px)]">
         <span className="label">05 · Take it apart · photographed</span>
         <h2 className="m-0 text-[clamp(2rem,4.6vw,3.6rem)] font-bold leading-[.98] tracking-[-.04em]">Pull it apart <span className="grad">yourself.</span></h2>
-        <p className="m-0 max-w-[560px] text-mute">Every layer is a real photograph. Drag any layer out; let go and it glides home. Click a layer to read it.</p>
+        <p className="m-0 max-w-[560px] text-mute">{TOUCH ? 'Every layer is a real photograph. Hold any layer, then drag it out; let go and it glides home. Tap a layer to read it.' : 'Every layer is a real photograph. Drag any layer out; let go and it glides home. Click a layer to read it.'}</p>
       </div>
-      <div ref={stage} className="relative h-[100svh] w-full touch-none select-none bg-[#050505]" onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up}
-        onPointerLeave={() => { if (!drag) setHover(-1); }} style={{ cursor: drag?.moved ? 'grabbing' : hover >= 0 ? 'grab' : undefined }}>
+      <div ref={stage} className="relative h-[100svh] w-full select-none bg-[#050505]" onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up}
+        onPointerLeave={() => { if (!drag) setHover(-1); }} style={{ cursor: drag?.moved ? 'grabbing' : hover >= 0 ? 'grab' : undefined, touchAction: TOUCH ? 'pan-y' : 'none' }}>
         <div aria-hidden="true" className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(60% 45% at 50% 70%, rgba(240,181,58,.07), transparent 70%)' }} />
         {layers.map((l, i) => {
           const r = parts[l.id]?.rect; if (!r) return null;
@@ -109,7 +135,7 @@ export function PhotoBreakdown() {
         {hover >= 0 && !drag && (() => { const r = parts[layers[hover].id].rect; return (
           <span className="pointer-events-none absolute z-50 -translate-x-1/2 whitespace-nowrap rounded-full border border-ink-line bg-ink/80 px-3 py-1 text-[.78rem] backdrop-blur-md"
             style={{ left: box.x + ((r[0] + r[2]) / 2) * box.w, top: box.y + r[3] * box.h - 28 }}>{pad(hover + 1, 2)} · {layers[hover].name}</span>); })()}
-        <p className="pointer-events-none absolute inset-x-0 bottom-[max(18px,env(safe-area-inset-bottom,0px))] z-50 m-0 text-center font-mono text-[.7rem] uppercase tracking-[.14em] text-cream/70">Drag any layer out · click to read it</p>
+        <p className="pointer-events-none absolute inset-x-0 bottom-[max(18px,env(safe-area-inset-bottom,0px))] z-50 m-0 text-center font-mono text-[.7rem] uppercase tracking-[.14em] text-cream/70">{TOUCH ? 'Hold a layer to pick it up · tap to read it' : 'Drag any layer out · click to read it'}</p>
         {L && (
           <aside className="absolute right-[var(--gut-r)] top-6 z-50 grid max-h-[calc(100svh-48px)] w-[min(360px,calc(100%-32px))] content-start gap-3 overflow-auto rounded-[22px] border border-ink-line bg-ink-2/80 p-5 backdrop-blur-xl" aria-live="polite">
             <div className="flex items-start justify-between gap-3">

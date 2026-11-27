@@ -6,16 +6,22 @@ import { stage, type Anchor, type AnchorSpec } from './store';
  * flow (so the device rides with scroll, or stays put inside a pinned stage) and receives the
  * drag and cursor-light pointer events; the canvas itself never takes pointer events.
  */
+const observers = new Map<string, IntersectionObserver>();
+
 export function useStageAnchor(id: string, spec: AnchorSpec) {
   const anchor = useRef<Anchor | null>(null);
   if (anchor.current) anchor.current.spec = spec; // latest spec every render
   useEffect(() => { stage.wake(); }, [spec.device, spec.finish, spec.rot[0], spec.rot[1]]);
 
   const ref = useCallback((el: HTMLElement | null) => {
-    if (!el) { if (anchor.current) stage.anchors.delete(id); anchor.current = null; return; }
-    const a: Anchor = { id, el, spec, user: { x: 0, y: 0, vx: 0, vy: 0, dragging: false }, pointer: { x: 0.5, y: 0.5, inside: false } };
+    if (!el) { if (anchor.current) stage.anchors.delete(id); observers.get(id)?.disconnect(); observers.delete(id); anchor.current = null; return; }
+    const a: Anchor = { id, el, spec, user: { x: 0, y: 0, vx: 0, vy: 0, dragging: false }, pointer: { x: 0.5, y: 0.5, inside: false }, onScreen: false };
     anchor.current = a;
     stage.anchors.set(id, a);
+    // the stage only redraws on scroll while an anchor is in (or about to enter) the viewport
+    const io = new IntersectionObserver(es => { a.onScreen = es[es.length - 1].isIntersecting; stage.wake(); }, { rootMargin: '25% 0px' });
+    io.observe(el);
+    observers.set(id, io);
     let last: { x: number; y: number; touch: boolean } | null = null;
     const local = (e: PointerEvent) => { const r = el.getBoundingClientRect(); a.pointer.x = (e.clientX - r.left) / r.width; a.pointer.y = (e.clientY - r.top) / r.height; };
     el.addEventListener('pointerdown', e => {

@@ -129,7 +129,8 @@ export function Teardown({ source, copy = TEARDOWN_COPY }: { source?: ExploreSou
 
         <div className="relative grid gap-5">
           <div ref={stage} className="relative ml-[calc(50%-50vw)] h-[100svh] w-screen overflow-hidden bg-[#050403]"
-            onPointerMove={e => { if (e.pointerType === 'mouse' || e.buttons) steerTo(e.clientY); }} style={{ touchAction: arrivedNow ? 'pan-x' : undefined }}>
+            onPointerMove={e => { if (e.pointerType === 'mouse' || (e.pointerType === 'pen' && e.buttons)) steerTo(e.clientY); }}>
+            {/* a finger scrolls the page here (the stage fills the screen); the camera drifts along the part by itself */}
             {/* laid out at the zoomed size (not scaled), so the photos are drawn sharp at every zoom */}
             <div className="absolute" style={{ left: tx, top: ty, width: size.w * s, height: size.h * s }}>
               <img src={img(dir)} alt={source ? `${subject}, photographed.` : `${subject}, exploded into its ${layers.length} layers.`} className="absolute inset-0 h-full w-full object-cover" decoding="async" />

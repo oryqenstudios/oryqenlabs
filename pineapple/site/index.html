@@ -11,6 +11,10 @@
     <meta property="og:description" content="Designed by nature’s math. Take it apart layer by layer, in 3D." />
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" href="./logo.svg" type="image/svg+xml" />
+    <!-- the hero's opening frame and the frame list load alongside the code, so the first paint is a real image -->
+    <link rel="preload" href="./frames/manifest.json" as="fetch" crossorigin />
+    <link rel="preload" href="./frames/mobile/shot-01/ripen/0001.avif" as="image" type="image/avif" media="(max-width: 760px)" fetchpriority="high" />
+    <link rel="preload" href="./frames/shot-01/ripen/0001.avif" as="image" type="image/avif" media="(min-width: 761px)" fetchpriority="high" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&family=Instrument+Serif:ital@1&family=JetBrains+Mono:wght@400;600&display=swap" />

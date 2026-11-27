@@ -3,9 +3,11 @@ import { FINISHES, ZEST, type FinishKey, type ZestKey } from '../data/finishes';
 import { GOLDEN_ANGLE, TAU } from '../lib/math';
 import { hexPath, mix } from '../sequence/placeholders';
 import { isSmallScreen } from '../lib/tokens';
+import { profile } from './quality';
 
-/** Phones get 2K textures, desktop 4K on the long edge (plan §10). Everything starts at 512 and upgrades. */
-export const TEX_HI = () => (isSmallScreen() ? 2048 : 4096);
+/** Phones get 2K textures, desktop 4K on the long edge (plan §10), within the tier's cap (1024 on reduced).
+ *  Everything starts at 512 and upgrades. */
+export const TEX_HI = () => Math.min(isSmallScreen() ? 2048 : 4096, profile().maxTexture);
 export const TEX_LO = 512;
 
 const canvas = (w: number, h: number) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
@@ -75,6 +77,15 @@ export function labelTexture(w: number, h: number, bg: string, lines: [string, n
   return canvasTexture(c);
 }
 
+/** The photo itself, or a copy scaled down to the tier's longest edge. */
+function capped(im: HTMLImageElement): HTMLImageElement | HTMLCanvasElement {
+  const max = profile().maxTexture, w = im.naturalWidth, h = im.naturalHeight;
+  if (Math.max(w, h) <= max) return im;
+  const k = max / Math.max(w, h), c = canvas(Math.round(w * k), Math.round(h * k)), g = c.getContext('2d')!;
+  g.imageSmoothingQuality = 'high'; g.drawImage(im, 0, 0, c.width, c.height);
+  return c;
+}
+
 /** A photographed part (frames/parts/<name>.webp) as a texture. Shows a neutral tone until the photo arrives, then
  *  wakes the stage so it redraws. */
 export function photoTexture(name: string, srgb = true) {
@@ -82,7 +93,7 @@ export function photoTexture(name: string, srgb = true) {
   const g = c.getContext('2d')!; g.fillStyle = '#1a1b18'; g.fillRect(0, 0, 2, 2);
   const t = new THREE.Texture(c); if (srgb) t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; t.needsUpdate = true;
   const im = new Image(); im.decoding = 'async';
-  im.onload = () => { t.dispose(); t.image = im; t.needsUpdate = true; import('./store').then(m => m.stage.wake()); };
+  im.onload = () => { t.dispose(); t.image = capped(im); t.needsUpdate = true; import('./store').then(m => m.stage.wake()); };
   im.src = `${import.meta.env.BASE_URL}frames/parts/${name}.webp`;
   return t;
 }

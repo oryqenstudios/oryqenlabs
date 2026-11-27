@@ -7,6 +7,8 @@ export const ease = (t: number) => 1 - Math.pow(1 - clamp(t, 0, 1), 5);
 
 export const reducedMotion = () => typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 export const isSmallScreen = () => typeof matchMedia !== 'undefined' && matchMedia('(max-width: 760px)').matches;
+/** A finger is the main pointer: phones and tablets (a laptop with a touchscreen still has a mouse first). */
+export const isTouch = () => typeof matchMedia !== 'undefined' && matchMedia('(pointer: coarse)').matches;
 
 /** The page accent follows the chosen finish or palette (logo, nav highlight, headline gradient). */
 let accentNow = '#f0b53a';

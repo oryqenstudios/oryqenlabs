@@ -8,7 +8,8 @@ import { createRuntime, stepRuntime, setLensPass, scatter, type BreakdownRuntime
 import { stage } from './store';
 import { ScrollTrigger } from '../lib/scroll';
 import { reducedMotion, currentAccent } from '../lib/tokens';
-import { setQuality, qualityForced } from './quality';
+import { setQuality, dropQuality, getQuality, qualityForced, profile, type Profile, type Quality } from './quality';
+import { useQuality } from './useLive';
 import { GOLDEN_ANGLE } from '../lib/math';
 import type { DeviceKey } from '../data/devices';
 
@@ -17,33 +18,56 @@ const VIEW_H = 2 * CAM_Z * Math.tan(((FOV / 2) * Math.PI) / 180); // world heigh
 const LENS_R = () => (innerWidth < 760 ? 70 : 96);
 
 /**
- * One persistent canvas over the page (plan §9). It draws only where sections place anchors,
- * renders on demand, and sleeps when no anchor is on screen.
+ * One persistent canvas over the page (plan §9). It draws only where sections place anchors (and the logo burst),
+ * renders only when something changes, skips frames with nothing on screen, and pauses while the tab is hidden.
+ * The quality tier (quality.ts) sets the canvas up; a tier change rebuilds it, because antialiasing and the stencil
+ * buffer can only be chosen when the GPU context is created.
  */
 export function Stage() {
+  const tier = useQuality();
+  if (tier === 'stills') return null;
+  const p = profile(tier);
   return (
     <Canvas
+      key={tier}
       frameloop="demand"
-      dpr={[1, 2]}
+      dpr={p.dpr}
       performance={{ min: 0.5 }}
+      shadows={false}
       camera={{ fov: FOV, position: [0, 0, CAM_Z], near: 1, far: 200 }}
-      gl={{ antialias: true, alpha: true, stencil: true, powerPreference: 'high-performance' }}
+      gl={{ antialias: p.antialias, alpha: true, stencil: p.lensPass, powerPreference: p.powerPreference }}
       style={{ position: 'fixed', inset: 0, zIndex: 20, pointerEvents: 'none' }}
       aria-hidden="true"
     >
-      <Studio />
-      <Director />
+      <Studio envRes={p.envRes} />
+      <Director tier={tier} prof={p} />
       <Burst />
       <AdaptiveDpr pixelated={false} />
+      <Pause />
     </Canvas>
   );
 }
 
+/** Rendering stops while the tab is hidden or the canvas is off screen, and picks up where it left off. */
+function Pause() {
+  const gl = useThree(s => s.gl), setFrameloop = useThree(s => s.setFrameloop), invalidate = useThree(s => s.invalidate);
+  useEffect(() => {
+    let tab = !document.hidden, seen = true;
+    const apply = () => { const on = tab && seen; setFrameloop(on ? 'demand' : 'never'); if (on) invalidate(); };
+    const onVis = () => { tab = !document.hidden; apply(); };
+    const io = new IntersectionObserver(es => { seen = es[es.length - 1].isIntersecting; apply(); });
+    io.observe(gl.domElement);
+    document.addEventListener('visibilitychange', onVis);
+    return () => { io.disconnect(); document.removeEventListener('visibilitychange', onVis); };
+  }, [gl, setFrameloop, invalidate]);
+  return null;
+}
+
 /** Procedural studio: soft boxes for reflections (stand-in for the 4K HDRI), key and rim lights. */
-function Studio() {
+function Studio({ envRes }: { envRes: number }) {
   return (
     <>
-      <Environment resolution={256} frames={1}>
+      <Environment resolution={envRes} frames={1}>
         <color attach="background" args={['#0b0c09']} />
         <Lightformer form="rect" intensity={5} position={[-30, 32, 30]} scale={[46, 22, 1]} target={[0, 0, 0]} />
         <Lightformer form="rect" intensity={3} color="#fff0d2" position={[44, 4, -6]} scale={[14, 44, 1]} target={[0, 0, 0]} />
@@ -65,27 +89,40 @@ interface Slot {
   /** Last layer the view centred on, kept while the centring eases out. */
   focusI: number; focusClose: boolean;
   shadow: THREE.Mesh;
+  /** Its 2K/4K textures have been asked for. */
+  upgraded: boolean;
 }
 interface Acc { w: number; pres: number; cx: number; cy: number; size: number; rx: number; ry: number; finish: AnyFinish | null; best: number; bd: BreakdownState | null; shadow: boolean }
 
 const HEAT = 70;
+const KEYS: DeviceKey[] = ['phone', 'tablet'];
+/** Below this many frames a second, held for two seconds of continuous animation, the stage drops a tier. The first
+ *  seconds after the stage mounts don't count: the page is still loading around it (and the intro burst plays). */
+const MIN_FPS = 45, WATCH_S = 2, WARMUP_MS = 5000;
 
-function Director() {
+function Director({ tier, prof }: { tier: Quality; prof: Profile }) {
   const { camera, invalidate, performance, scene } = useThree();
-  const slots = useMemo(() => {
-    const make = (model: DeviceModel): Slot => {
-      const place = new THREE.Group(), pivot = new THREE.Group();
-      pivot.add(model.root); place.add(pivot); place.visible = false;
-      const shadow = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map: shadowTexture(), color: 0xffffff, transparent: true, depthWrite: false, opacity: 0, toneMapped: false, blending: THREE.AdditiveBlending }));
-      shadow.visible = false; shadow.renderOrder = -1;
-      return { shadow, model, rt: createRuntime(model), place, pivot, vis: 0, rot: new THREE.Euler(0.2, Math.PI - 0.5, 0), finish: null, bd: null, zoom: 1, center: 0, shift: new THREE.Vector2(), focusI: -1, focusClose: false };
-    };
-    return { phone: make(buildPhone()), tablet: make(buildTablet()) } as Record<DeviceKey, Slot>;
-  }, []);
+  // a device model (geometry, photographed textures) is only built once a section first asks for it
+  const root = useRef<THREE.Group>(null);
+  const built = useRef<Partial<Record<DeviceKey, Slot>>>({});
+  const slotFor = (key: DeviceKey): Slot => {
+    const have = built.current[key]; if (have) return have;
+    const model = key === 'phone' ? buildPhone() : buildTablet();
+    const place = new THREE.Group(), pivot = new THREE.Group();
+    pivot.add(model.root); place.add(pivot); place.visible = false;
+    const shadow = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map: shadowTexture(), color: 0xffffff, transparent: true, depthWrite: false, opacity: 0, toneMapped: false, blending: THREE.AdditiveBlending }));
+    shadow.visible = false; shadow.renderOrder = -1;
+    const s: Slot = { shadow, model, rt: createRuntime(model), place, pivot, vis: 0, rot: new THREE.Euler(0.2, Math.PI - 0.5, 0), finish: null, bd: null, zoom: 1, center: 0, shift: new THREE.Vector2(), focusI: -1, focusClose: false, upgraded: false };
+    root.current!.add(shadow, place);
+    return (built.current[key] = s);
+  };
+  const slotList = () => KEYS.map(k => built.current[k]).filter((s): s is Slot => !!s);
+  useEffect(() => () => { for (const s of slotList()) { disposeTree(s.place); s.shadow.geometry.dispose(); } built.current = {}; }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const cursor = useRef<THREE.PointLight>(null), rake = useRef<THREE.PointLight>(null);
-  const upgraded = useRef(false);
   const lensAt = useRef<{ x: number; y: number; slot: Slot } | null>(null);
-  const perf = useRef({ t: 0, n: 0, strikes: 0, continuous: false });
+  const watch = useRef({ t: 0, n: 0, chained: false, from: window.performance.now() + WARMUP_MS });
+  const drawn = useRef(true);
+  const heatN = Math.max(8, Math.round(HEAT * prof.particles));
   const accentC = useMemo(() => new THREE.Color(), []);
   const time = useRef(0);
 
@@ -93,9 +130,9 @@ function Director() {
     const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(HEAT * 3), 3));
     const c = document.createElement('canvas'); c.width = c.height = 64; const x = c.getContext('2d')!; const gr = x.createRadialGradient(32, 32, 0, 32, 32, 32); gr.addColorStop(0, '#fff'); gr.addColorStop(1, 'rgba(255,255,255,0)'); x.fillStyle = gr; x.fillRect(0, 0, 64, 64);
     const p = new THREE.Points(g, new THREE.PointsMaterial({ map: new THREE.CanvasTexture(c), color: 0xff8a3a, size: 0.5, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0 }));
-    p.visible = false; p.frustumCulled = false;
+    p.visible = false; p.frustumCulled = false; g.setDrawRange(0, heatN);
     return p;
-  }, []);
+  }, [heatN]);
 
   const lens = useMemo(() => {
     const s = new THREE.Scene(), cam = new THREE.OrthographicCamera(0, 1, 1, 0, -1, 1);
@@ -107,7 +144,7 @@ function Director() {
   /* ---------- picking and pulling for the breakdown ---------- */
   useEffect(() => {
     const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), plane = new THREE.Plane(), hit = new THREE.Vector3();
-    const bdSlot = () => (slots.phone.bd ? slots.phone : slots.tablet.bd ? slots.tablet : null);
+    const bdSlot = () => slotList().find(s => s.bd) ?? null;
     const aim = (x: number, y: number) => { ndc.set((x / innerWidth) * 2 - 1, -(y / innerHeight) * 2 + 1); ray.setFromCamera(ndc, camera); };
     const toScreen = (v: THREE.Vector3) => { v.project(camera); return [((v.x + 1) / 2) * innerWidth, ((1 - v.y) / 2) * innerHeight]; };
     stage.bd = {
@@ -148,21 +185,24 @@ function Director() {
       place(i) { const s = bdSlot(); if (!s) return; const r = s.rt.layers[i]; r.placed = true; r.pull.add(r.scatter); r.scatter.set(0, 0, 0); invalidate(); },
     };
     return () => { stage.bd = null; };
-  }, [camera, invalidate, slots]);
+  }, [camera, invalidate]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const gl = useThree(s => s.gl);
   useEffect(() => {
-    // a lost GPU context (driver reset, memory pressure) falls back to still renders
-    const lost = (e: Event) => { e.preventDefault(); setQuality('stills'); };
+    // a lost GPU context (driver reset, memory pressure) falls back to still renders; a canvas being replaced after a
+    // tier change loses its context on purpose, so only the current tier's canvas counts
+    const lost = (e: Event) => { e.preventDefault(); if (getQuality() === tier) setQuality('stills'); };
     gl.domElement.addEventListener('webglcontextlost', lost);
     return () => gl.domElement.removeEventListener('webglcontextlost', lost);
-  }, [gl]);
+  }, [gl, tier]);
 
   useEffect(() => {
     stage.wake = () => invalidate();
     stage.markReady();
-    const st = ScrollTrigger.create({ start: 0, end: 'max', onUpdate: () => invalidate() });
-    const onResize = () => invalidate();
+    // scrolling only redraws while something of the stage's is on screen (or still fading out)
+    const active = () => { for (const a of stage.anchors.values()) if (a.onScreen) return true; return slotList().some(s => s.place.visible); };
+    const st = ScrollTrigger.create({ start: 0, end: 'max', onUpdate: () => { if (active()) invalidate(); } });
+    const onResize = () => { if (active()) invalidate(); };
     addEventListener('resize', onResize);
     return () => { st.kill(); removeEventListener('resize', onResize); stage.wake = () => {}; };
   }, [invalidate]);
@@ -175,9 +215,6 @@ function Director() {
     let busy = false, lightOn = false;
     const lp = new THREE.Vector3();
     const accent = accentC.set(currentAccent());
-    // watchdog: if continuous rendering stays under ~22 fps, fall back to still renders
-    const pw = perf.current;
-    if (!qualityForced && dtRaw < 0.25 && pw.continuous) { pw.t += dtRaw; pw.n++; if (pw.t >= 2) { pw.strikes = pw.n / pw.t < 22 ? pw.strikes + 1 : Math.max(0, pw.strikes - 1); pw.t = pw.n = 0; if (pw.strikes >= 3) setQuality('stills'); } }
 
     const acc = {} as Record<DeviceKey, Acc>;
     for (const k of ['phone', 'tablet'] as DeviceKey[]) acc[k] = { w: 0, pres: 0, cx: 0, cy: 0, size: 0, rx: 0, ry: 0, finish: null, best: 0, bd: null, shadow: true };
@@ -200,8 +237,10 @@ function Director() {
     lensAt.current = null;
     heat.visible = false;
     let rakeOn = false;
-    for (const key of ['phone', 'tablet'] as DeviceKey[]) {
-      const s = slots[key], d = acc[key];
+    for (const key of KEYS) {
+      const d = acc[key];
+      if (!built.current[key] && d.w <= 0) continue; // never asked for: nothing to build or draw
+      const s = slotFor(key);
       const target = d.w > 0 ? THREE.MathUtils.smoothstep(d.pres, 0, 0.35) : 0;
       s.vis = rm ? target : s.vis + (target - s.vis) * (1 - Math.exp(-dt * 8));
       if (Math.abs(target - s.vis) > 0.002) busy = true;
@@ -278,7 +317,7 @@ function Director() {
         heat.visible = true; busy = true;
         const from = s.rt.chip.getWorldPosition(new THREE.Vector3()), to = s.rt.sink.getWorldPosition(new THREE.Vector3());
         const pos = heat.geometry.attributes.position as THREE.BufferAttribute, sc = s.place.scale.x;
-        for (let k = 0; k < HEAT; k++) { const t = (time.current * 0.35 + k / HEAT) % 1, a = k * GOLDEN_ANGLE, r = t * 1.6 * sc * (key === 'tablet' ? 2 : 1); pos.setXYZ(k, THREE.MathUtils.lerp(from.x, to.x, t) + Math.cos(a) * r, THREE.MathUtils.lerp(from.y, to.y, t) + Math.sin(a) * r, THREE.MathUtils.lerp(from.z, to.z, t)); }
+        for (let k = 0; k < heatN; k++) { const t = (time.current * 0.35 + k / heatN) % 1, a = k * GOLDEN_ANGLE, r = t * 1.6 * sc * (key === 'tablet' ? 2 : 1); pos.setXYZ(k, THREE.MathUtils.lerp(from.x, to.x, t) + Math.cos(a) * r, THREE.MathUtils.lerp(from.y, to.y, t) + Math.sin(a) * r, THREE.MathUtils.lerp(from.z, to.z, t)); }
         pos.needsUpdate = true;
         const m = heat.material as THREE.PointsMaterial; m.size = 0.5 * sc * (key === 'tablet' ? 2 : 1); m.opacity = 0.9;
       }
@@ -288,8 +327,8 @@ function Director() {
         const fw = s.model.layers[2].group.getWorldPosition(new THREE.Vector3()), sc = s.place.scale.x * 10;
         rake.current.position.set(fw.x + 0.5 * sc, fw.y + THREE.MathUtils.lerp(-0.8, 0.8, (Math.sin(time.current * 0.8) + 1) / 2) * sc, fw.z + 0.2 * sc);
       }
-      // hover-lens scanner
-      if (bd.scanner && bd.lens && bd.mode !== 'xray' && !bd.close && !bd.build.active) {
+      // hover-lens scanner (a second render of the scene: desktop only)
+      if (prof.lensPass && bd.scanner && bd.lens && bd.mode !== 'xray' && !bd.close && !bd.build.active) {
         lensAt.current = { x: bd.lens.x, y: bd.lens.y, slot: s };
         const el = bd.dom.lens, txt = bd.dom.lensText;
         if (el && stageRect) {
@@ -308,45 +347,70 @@ function Director() {
       cursor.current.intensity += ((lightOn ? 140 : 0) - cursor.current.intensity) * (1 - Math.exp(-dt * 10));
       if (lightOn) cursor.current.position.lerp(lp, 1 - Math.exp(-dt * 14));
     }
-    if (!upgraded.current && (slots.phone.vis > 0.5 || slots.tablet.vis > 0.5)) {
-      upgraded.current = true;
-      // progressive: 512 px textures first, 2K/4K once the device has settled on screen
-      setTimeout(() => { slots.phone.model.upgradeTextures(); slots.tablet.model.upgradeTextures(); invalidate(); }, 1200);
+    for (const s of slotList()) if (!s.upgraded && s.vis > 0.5) {
+      s.upgraded = true;
+      // progressive: 512 px textures first, 2K/4K once the device has settled on screen (capped per tier)
+      setTimeout(() => { s.model.upgradeTextures(); invalidate(); }, 1200);
     }
-    perf.current.continuous = busy;
     if (busy) invalidate();
   });
 
   /* ---------- render (takes over from R3F so the lens can use the stencil buffer) ---------- */
-  useFrame(({ gl, size }) => {
-    gl.autoClear = false;
-    gl.clear(true, true, true);
-    gl.render(scene, camera);
-    const L = lensAt.current;
-    if (!L) return;
-    const { cam, disc } = lens;
-    cam.left = 0; cam.right = size.width; cam.top = size.height; cam.bottom = 0; cam.updateProjectionMatrix();
-    disc.position.set(L.x, size.height - L.y, 0); disc.scale.setScalar(LENS_R());
-    gl.clearStencil(); gl.render(lens.scene, cam); gl.clearDepth();
-    const other = L.slot === slots.phone ? slots.tablet : slots.phone, ov = other.place.visible, hv = heat.visible;
-    other.place.visible = false; heat.visible = false;
-    setLensPass(L.slot.rt, true);
-    gl.render(scene, camera);
-    setLensPass(L.slot.rt, false);
-    other.place.visible = ov; heat.visible = hv;
+  useFrame((state, dtRaw) => {
+    const { gl, size } = state;
+    // a frame with nothing on screen is skipped (after one clear to wipe what was there)
+    const any = heat.visible || stage.burstProgress() < 1 || slotList().some(s => s.place.visible || s.shadow.visible);
+    if (any || drawn.current) {
+      gl.autoClear = false;
+      gl.clear(true, true, true);
+      if (any) gl.render(scene, camera);
+      drawn.current = any;
+      const L = any ? lensAt.current : null;
+      if (L) {
+        const { cam, disc } = lens;
+        cam.left = 0; cam.right = size.width; cam.top = size.height; cam.bottom = 0; cam.updateProjectionMatrix();
+        disc.position.set(L.x, size.height - L.y, 0); disc.scale.setScalar(LENS_R());
+        gl.clearStencil(); gl.render(lens.scene, cam); gl.clearDepth();
+        const others = slotList().filter(s => s !== L.slot), ov = others.map(s => s.place.visible), hv = heat.visible;
+        others.forEach(s => { s.place.visible = false; }); heat.visible = false;
+        setLensPass(L.slot.rt, true);
+        gl.render(scene, camera);
+        setLensPass(L.slot.rt, false);
+        others.forEach((s, i) => { s.place.visible = ov[i]; }); heat.visible = hv;
+      }
+    }
+    // watchdog: averaging under MIN_FPS across WATCH_S seconds of unbroken animation drops a tier (full → reduced → stills).
+    // A frame counts when the frame before it asked for it (an invalidate from inside useFrame sets frames to 2).
+    const w = watch.current;
+    if (!qualityForced) {
+      if (w.chained && dtRaw < 0.5 && window.performance.now() > w.from) {
+        w.t += dtRaw; w.n++;
+        if (w.t >= WATCH_S) { const fps = w.n / w.t; w.t = w.n = 0; if (fps < MIN_FPS) dropQuality(); }
+      } else { w.t = 0; w.n = 0; }
+    }
+    w.chained = state.internal.frames > 1;
   }, 1);
 
   return (
     <>
-      <primitive object={slots.phone.shadow} />
-      <primitive object={slots.tablet.shadow} />
-      <primitive object={slots.phone.place} />
-      <primitive object={slots.tablet.place} />
+      <group ref={root} />
       <primitive object={heat} />
       <pointLight ref={cursor} intensity={0} distance={40} decay={2} color="#fff3d6" />
       <pointLight ref={rake} intensity={0} distance={60} decay={2} color="#fff1d0" />
     </>
   );
+}
+
+/** Frees a rebuilt model's GPU memory (geometry, materials and their textures). */
+function disposeTree(o: THREE.Object3D) {
+  o.traverse(n => {
+    const m = n as THREE.Mesh; if (!m.isMesh && !(n as THREE.Points).isPoints) return;
+    m.geometry?.dispose();
+    for (const mat of ([] as THREE.Material[]).concat(m.material ?? [])) {
+      for (const v of Object.values(mat)) if (v instanceof THREE.Texture) v.dispose();
+      mat.dispose();
+    }
+  });
 }
 
 /** A soft elliptical floor shadow (radial falloff), drawn once. */

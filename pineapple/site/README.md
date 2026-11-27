@@ -89,8 +89,8 @@ One fixed, transparent canvas sits over the page (`three/Stage.tsx`). Sections n
 director reads the anchors on screen and places the device to fit them, so it rides with scroll, holds still inside pinned
 stages, and blends from one anchor to the next. Rotation and finish colour ease, so hand-offs never snap.
 
-- Live sections: Design (03, drag to spin, light follows the cursor), Finish (04, Ripen shifts green→gold with the angle),
-  the breakdown (05, see below), Compare configurator (10).
+- Live sections: none at the moment. Every product section is now AI footage or photographs, so the canvas only draws
+  the logo burst; `DeviceAnchor` and `sections/Breakdown.tsx` are kept for when a live device returns.
 - Live stages are two sticky layers: a background below the canvas and a transparent UI layer above it (`live` on
   `ScrubSection`, `.pin-over` in CSS), so panels and text always sit above the device.
 
@@ -105,13 +105,32 @@ View modes: X-ray (shell outlines, glowing insides), Thermal (heat flows from th
 with a depth-of-field blur: AI shots 06/07/08/10 play in an overlay; the display shows its subpixels; the frame gets a
 raking light while the Crown Key presses in two stages. Build it yourself scatters the layers; dropping them back in order
 (back glass first) rebuilds the device and ends with the logo burst.
-- The canvas renders on demand and stops completely when no anchor is on screen (0 draw calls during the AI sequences).
-- The 3D code is a separate lazy chunk (~250 KB gzipped); the first view loads ~118 KB.
-- Textures start at 512 px and upgrade to 4K (desktop) or 2K (phones) once the device has settled.
+- The canvas renders only when something changes. Scrolling wakes it only while an anchor is on (or near) the screen,
+  a frame with nothing to draw is skipped after one clear, and rendering pauses while the tab is hidden or the canvas
+  is off screen (`Pause` in `Stage.tsx`).
+- Device models (geometry and the photographed part textures in `frames/parts/`) are built only when a section first
+  places an anchor for that device; nothing is fetched for them before.
+- The 3D code is a separate lazy chunk (~250 KB gzipped). Desktop loads it at once and the loader waits for it (so the
+  loading logo can burst into the hero). Touch devices skip the loader: the hero's text and opening frame show first
+  (that frame and `frames/manifest.json` are preloaded in `index.html`), and the 3D code follows when the page is idle.
+- Textures start at 512 px and upgrade to 4K (desktop) or 2K (phones) once the device has settled, within the tier's cap.
 - Resolution drops while dragging and recovers when it settles (`performance.regress` + `AdaptiveDpr`).
-- Quality (`three/quality.ts`): live 3D, or still renders for devices without WebGL, with a software GPU, on data saver or
-  with ≤ 2 GB memory. At runtime the stage also falls back to stills if continuous rendering stays under ~22 fps for
-  about 6 s, if the GPU context is lost, or if the 3D code throws. `?quality=high` or `?quality=low` forces either.
+- Quality tiers (`three/quality.ts`), picked at load:
+  - **full** (desktop): pixel ratio up to 2, antialiasing, the hover lens's stencil pass, 256 px reflections.
+  - **reduced** (touch devices): pixel ratio capped at 1.5, antialiasing off on screens of pixel ratio 2 or more, no
+    stencil or lens pass, 128 px reflections, 60% of the particles (burst scales, heat flow), textures capped at 1024 px.
+  - **stills**: no WebGL, a software GPU, Save-Data, prefers-reduced-motion or ≤ 2 GB device memory. Device anchors show
+    their still images (they also show them as a poster until the 3D stage has loaded).
+
+  At runtime the stage drops one tier if it averages under 45 fps across 2 s of unbroken animation (ignoring its first
+  5 s, while the page is still loading), and goes straight to stills if the GPU context is lost or the 3D code throws.
+  A tier change rebuilds the canvas, since antialiasing and the stencil buffer are fixed when the context is created.
+  `?quality=high`, `?quality=reduced` or `?quality=low` forces a tier and turns the watchdog off.
+- There are no shadow maps or post-processing passes, and no model files: all geometry is generated in code, so there
+  is nothing for Draco or meshopt to compress. KTX2 would only apply to the 15 part photos (2.1 MB of WebP), which are
+  no longer downloaded unless a device model is built; it is not worth a basis transcoder (~580 KB) today.
+- Touch devices keep native scrolling: Lenis is off, and the full-screen photo stages let a swipe scroll the page (in
+  "Pull it apart" you hold a layer for a moment to pick it up; the chip explorer no longer captures vertical swipes).
 - The device sits in a faint floor glow in the accent colour (a shadow cannot show on a black studio).
 
 ## Logo burst (plan §6)

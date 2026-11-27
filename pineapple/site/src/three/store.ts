@@ -29,6 +29,8 @@ export interface Anchor {
   user: { x: number; y: number; vx: number; vy: number; dragging: boolean };
   /** Cursor position inside the anchor, 0–1. */
   pointer: { x: number; y: number; inside: boolean };
+  /** In or near the viewport (kept by an IntersectionObserver), so scrolling only wakes the stage when it matters. */
+  onScreen: boolean;
 }
 
 /** Mutable singleton shared by DOM anchors and the render loop (no React re-renders per frame). */
@@ -45,11 +47,13 @@ export const stage = {
   burst: null as null | ((spec: BurstSpec) => void),
   /** 0 while a burst is flying, rising to 1 as the logo rebuilds; 1 when idle. */
   burstProgress: () => 1,
-  /** Resolves when the 3D stage has mounted (the loader waits for it). */
+  /** Resolves when the 3D stage has mounted (the desktop loader waits for it). */
   ready: readyPromise,
-  markReady: () => resolveReady(),
+  /** True once the 3D stage has mounted: device anchors keep their still poster until then. */
+  isReady: false,
+  markReady: () => { stage.isReady = true; resolveReady(); },
   /** Live 3D is on (see quality.ts). */
-  get webgl() { return getQuality() === 'live'; },
+  get webgl() { return getQuality() !== 'stills'; },
 };
 
 export interface BreakdownApi {

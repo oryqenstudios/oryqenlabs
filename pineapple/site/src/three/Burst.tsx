@@ -5,6 +5,7 @@ import { stage, type BurstSpec } from './store';
 import { hexShape, ext } from './geometry';
 import { ease, isSmallScreen } from '../lib/tokens';
 import { GOLDEN_ANGLE } from '../lib/math';
+import { profile } from './quality';
 
 /**
  * The logo burst (plan §6): the pineapple breaks into its own glossy hexagonal scales, which
@@ -43,7 +44,7 @@ export function Burst() {
   useEffect(() => {
     stage.burst = spec => {
       const st = spec.start ?? spec.home(), S = st.width / 64;
-      const n = Math.min(MAX, spec.small ? 18 : isSmallScreen() ? 46 : 84);
+      const n = Math.max(6, Math.round(Math.min(MAX, spec.small ? 18 : isSmallScreen() ? 46 : 84) * profile().particles)); // fewer on reduced
       const mk = (hx: number, hy: number, leaf: boolean): Piece => {
         const sx = st.left + hx * S, sy = st.top + hy * S;
         const dir = Math.atan2(sy - spec.from.y, sx - spec.from.x) + (Math.random() - 0.5) * 0.6;
@@ -67,7 +68,8 @@ export function Burst() {
       invalidate();
     };
     stage.burstProgress = () => { const r = run.current; return r ? Math.max(0, (r.t - RET) / (END - RET)) : 1; };
-    return () => { stage.burst = null; stage.burstProgress = () => 1; };
+    // if the stage is rebuilt or dropped mid-burst, the hidden DOM logo comes back rather than staying hidden
+    return () => { run.current?.spec.onDone(); run.current = null; stage.burst = null; stage.burstProgress = () => 1; };
   }, [invalidate, scales, leaves]);
 
   const m4 = useMemo(() => new THREE.Matrix4(), []), q = useMemo(() => new THREE.Quaternion(), []), qi = useMemo(() => new THREE.Quaternion(), []);
